@@ -12,6 +12,8 @@
     // because its type is javascript/worker.
     self.onmessage = function(e) {
       self.postMessage('msg from worker');
+      self.postMessage(e);
+      console.log(e)
     };
     // Rest of your worker code goes here.
   </script>
