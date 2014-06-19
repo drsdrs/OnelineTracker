@@ -1,0 +1,1 @@
+self.addEventListener("message",function(e){var t=e.data,n=new Float32Array(261120);for(var r=0;r<n.length;++r)n[r]=((7999999/r^(r&r>>11)*(r*r>>20))&255)/512-.5;console.log("\n\n"),console.log("BOOOM"),self.postMessage(n)},!1);

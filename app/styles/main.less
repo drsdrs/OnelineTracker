@@ -1,0 +1,49 @@
+.browsehappy {
+    margin: 0.2em 0;
+    background: #ccc;
+    color: #000;
+    padding: 0.2em 0;
+}
+
+@fg: rgb(6, 150, 6);
+@bg: rgb(22, 22, 22);
+
+body {
+  background: @bg;
+  color: @fg;
+
+
+  font-family: Monospace, Helvetica, Arial, sans-serif;
+}
+
+/*#############
+#   PATTERN   #
+#############*/
+#pattern {
+    border-top: 1px solid @fg;
+    border-left: 1px solid @fg;
+
+    position: fixed;
+    top: 20%;
+    height: 80%;
+    overflow-y: scroll;
+    width: 99%;
+
+
+    table td, table th{
+      border-right: 1px solid @fg;
+      margin: 0;
+      padding: 2px 8px;
+    }
+
+    table td{
+      border-bottom: 1px dashed @fg;
+      cursor: pointer;
+    }
+    table th{
+      border-bottom: 1px solid @fg;
+      cursor: pointer;
+    }
+}
+
+

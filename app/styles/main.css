@@ -1,0 +1,37 @@
+.browsehappy {
+  margin: 0.2em 0;
+  background: #ccc;
+  color: #000;
+  padding: 0.2em 0;
+}
+body {
+  background: #161616;
+  color: #069606;
+  font-family: Monospace, Helvetica, Arial, sans-serif;
+}
+/*#############
+#   PATTERN   #
+#############*/
+#pattern {
+  border-top: 1px solid #069606;
+  border-left: 1px solid #069606;
+  position: fixed;
+  top: 20%;
+  height: 80%;
+  overflow-y: scroll;
+  width: 99%;
+}
+#pattern table td,
+#pattern table th {
+  border-right: 1px solid #069606;
+  margin: 0;
+  padding: 2px 8px;
+}
+#pattern table td {
+  border-bottom: 1px dashed #069606;
+  cursor: pointer;
+}
+#pattern table th {
+  border-bottom: 1px solid #069606;
+  cursor: pointer;
+}
