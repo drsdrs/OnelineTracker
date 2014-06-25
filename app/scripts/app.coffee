@@ -18,10 +18,22 @@ class Pattern
     @tPerStep= 8192
     @steps= 16
     @data= [
-      new Event note: 4, funct: "t|t>>2"
+      new Event note: 0, funct: "17999999/t", rstT: true
+      new Event note: 0, funct: "t|t>>2"
+      new Event note: 1
       new Event note: 0
-      new Event note: 4
-      new Event note: 2
+      new Event note: 0, funct: "7999999/t", rstT: true
+      new Event note: 0, funct: "t|t>>2"
+      new Event note: 0
+      new Event note: 0
+      new Event note: 2, funct: "17999999/t", rstT: true
+      new Event note: 0, funct: "t|t>>2"
+      new Event note: 0
+      new Event note: 0
+      new Event note: 0, funct: "7999999/t", rstT: true
+      new Event note: 0, funct: "t|t>>2"
+      new Event note: 0
+      new Event note: 0
 
     ]
     for key, val of obj then if @[key]? then @[key]=val
@@ -107,15 +119,20 @@ app.initAnimation = ->
   rules = document.styleSheets[0].rules
   animateRow()
 
-
+activeRow = 0
 animateRow = (len)->
+  activeEls = document.getElementsByClassName "active"
+  if activeEls.length>0 then activeEls[0].className = ""
+  activeEl = document.getElementById "row"+activeRow
+  activeEl.className = "active"
+  activeRow = (++activeRow%16)
   # if oldLen is len then return false
   # oldLen = len
   # ptnPos.parentNode.replaceChild(ptnPos.cloneNode(true), ptnPos)
   # ptnPos.style.webkitAnimationName = "none"
   # ptnPos.style.animationName = "none"
-  # ptnPos.style.webkitAnimationDuration = (len*2/pico.samplerate)+"s"
-  # ptnPos.style.animationDuration = (len/pico.samplerate)+"s"
+  # ptnPos.style.webkitAnimationDuration = (len/44100)+"s"
+  # ptnPos.style.animationDuration = (len/44100)+"s"
   # setTimeout (->
   #   keyframes = findKeyframesRule("ptnPosAni")
   #   keyframes.deleteRule("0%")
@@ -127,7 +144,7 @@ animateRow = (len)->
   #   ptnPos= document.getElementById("ptnPosition")
 
   # ), 0
-  #window.requestAnimationFrame (time) -> animateRow()
+  # window.requestAnimationFrame (time) -> animateRow()
 ########## workers #################
 
 calcPtn = new Worker "workers/calcPtn.js"
@@ -140,21 +157,39 @@ tester.onmessage = (e)->
 
 ############################
 
-calcPtn.onmessage = (e)-> dev.writeBufferSync e.data
+calcPtn.onmessage = (e)->
+  if !dev? then return initDev()
+  dev.writeBufferSync e.data
 
 app.play = ->
   jsonPtn = JSON.stringify app.data.getActivePattern()
   calcPtn.postMessage(jsonPtn)
 
 app.stop = ->
-  pico.play(playBuffer)
-
+  dev.kill()
 
 ################################################
 
+dev= undefined
+swt= false
+initDev = ->
+  tPerStep= app.data.getActivePattern().tPerStep
+  c.l tPerStep
+  dev = audioLib.Sink null
+  app.dev = dev
+  timeDiff= dev.getPlaybackTime()
+  dev.on "audioprocess", (e)->
+    time = dev.getPlaybackTime()
+    if time>(timeDiff+(tPerStep/16))
+      animateRow()
+      timeDiff = time
+    if @getSyncWriteOffset()<1024 && swt
+      #'animateRow(playBuffer.buffLen)
+      app.play()
+      swt= false
+    else if swt isnt true then swt = true
 
 playBuffer =
-  dev: audioLib.Sink null
   tPerStep: app.data.getActivePattern().tPerStep
   steps: app.data.getActivePattern().steps
   activeRow: 0
@@ -164,19 +199,9 @@ playBuffer =
   t: 0
   swt: true
 
-playBuffer.dev.on "audioprocess", (e)->
-  time = playBuffer.dev.getPlaybackTime()%8192
-  #c.l time
-  if time is 0
-    c.l "as"
-    animateRow(playBuffer.buffLen)
-  if @getSyncWriteOffset()<5121 && swt
-    app.play()
-    swt= false
-  else if swt isnt true then swt = true
 
 ###################################
   
-app.dev = playBuffer.dev
+app.initDev = initDev
 app.playBuffer = playBuffer
 app.animateRow = animateRow

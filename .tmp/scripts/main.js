@@ -1,5 +1,5 @@
 (function() {
-  var Event, Pattern, animateRow, app, calcPtn, height, offset, oldLen, playBuffer, ptnPos, ptnTable, tester;
+  var Event, Pattern, activeRow, animateRow, app, calcPtn, dev, height, initDev, offset, oldLen, playBuffer, ptnPos, ptnTable, swt, tester;
 
   window.c = console;
 
@@ -40,14 +40,49 @@
       this.steps = 16;
       this.data = [
         new Event({
-          note: 4,
+          note: 0,
+          funct: "17999999/t",
+          rstT: true
+        }), new Event({
+          note: 0,
+          funct: "t|t>>2"
+        }), new Event({
+          note: 1
+        }), new Event({
+          note: 0
+        }), new Event({
+          note: 0,
+          funct: "7999999/t",
+          rstT: true
+        }), new Event({
+          note: 0,
           funct: "t|t>>2"
         }), new Event({
           note: 0
         }), new Event({
-          note: 4
+          note: 0
         }), new Event({
-          note: 2
+          note: 2,
+          funct: "17999999/t",
+          rstT: true
+        }), new Event({
+          note: 0,
+          funct: "t|t>>2"
+        }), new Event({
+          note: 0
+        }), new Event({
+          note: 0
+        }), new Event({
+          note: 0,
+          funct: "7999999/t",
+          rstT: true
+        }), new Event({
+          note: 0,
+          funct: "t|t>>2"
+        }), new Event({
+          note: 0
+        }), new Event({
+          note: 0
         })
       ];
       for (key in obj) {
@@ -113,7 +148,18 @@
     return animateRow();
   };
 
-  animateRow = function(len) {};
+  activeRow = 0;
+
+  animateRow = function(len) {
+    var activeEl, activeEls;
+    activeEls = document.getElementsByClassName("active");
+    if (activeEls.length > 0) {
+      activeEls[0].className = "";
+    }
+    activeEl = document.getElementById("row" + activeRow);
+    activeEl.className = "active";
+    return activeRow = ++activeRow % 16;
+  };
 
   calcPtn = new Worker("workers/calcPtn.js");
 
@@ -128,6 +174,9 @@
   };
 
   calcPtn.onmessage = function(e) {
+    if (typeof dev === "undefined" || dev === null) {
+      return initDev();
+    }
     return dev.writeBufferSync(e.data);
   };
 
@@ -138,11 +187,37 @@
   };
 
   app.stop = function() {
-    return pico.play(playBuffer);
+    return dev.kill();
+  };
+
+  dev = void 0;
+
+  swt = false;
+
+  initDev = function() {
+    var tPerStep, timeDiff;
+    tPerStep = app.data.getActivePattern().tPerStep;
+    c.l(tPerStep);
+    dev = audioLib.Sink(null);
+    app.dev = dev;
+    timeDiff = dev.getPlaybackTime();
+    return dev.on("audioprocess", function(e) {
+      var time;
+      time = dev.getPlaybackTime();
+      if (time > (timeDiff + (tPerStep / 16))) {
+        animateRow();
+        timeDiff = time;
+      }
+      if (this.getSyncWriteOffset() < 1024 && swt) {
+        app.play();
+        return swt = false;
+      } else if (swt !== true) {
+        return swt = true;
+      }
+    });
   };
 
   playBuffer = {
-    dev: audioLib.Sink(null),
     tPerStep: app.data.getActivePattern().tPerStep,
     steps: app.data.getActivePattern().steps,
     activeRow: 0,
@@ -153,22 +228,7 @@
     swt: true
   };
 
-  playBuffer.dev.on("audioprocess", function(e) {
-    var swt, time;
-    time = playBuffer.dev.getPlaybackTime() % 8192;
-    if (time === 0) {
-      c.l("as");
-      animateRow(playBuffer.buffLen);
-    }
-    if (this.getSyncWriteOffset() < 5121 && swt) {
-      app.play();
-      return swt = false;
-    } else if (swt !== true) {
-      return swt = true;
-    }
-  });
-
-  app.dev = playBuffer.dev;
+  app.initDev = initDev;
 
   app.playBuffer = playBuffer;
 

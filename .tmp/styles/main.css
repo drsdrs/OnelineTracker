@@ -79,15 +79,15 @@ option:hover {
   z-index: 9999;
   top: 0px;
   -webkit-animation-name: ptnPosAni;
-  -webkit-animation-duration: 3.75s;
+  -webkit-animation-duration: 1.75s;
   -webkit-animation-timing-function: linear;
   -webkit-animation-iteration-count: infinite;
   -webkit-animation-play-state: running;
   /* Standard syntax */
   -webkit-animation-name: ptnPosAni;
   animation-name: ptnPosAni;
-  -webkit-animation-duration: 3.75s;
-  animation-duration: 3.75s;
+  -webkit-animation-duration: 1.75s;
+  animation-duration: 1.75s;
   -webkit-animation-timing-function: linear;
   animation-timing-function: linear;
   -webkit-animation-iteration-count: infinite;
