@@ -74,6 +74,7 @@ module.exports = (grunt) ->
           "<%= config.app %>/styles/{,*/}*.less"
           #"<%= config.app %>/styles/{,*/}*.css"
           "<%= config.app %>/scripts/{,*/}*.coffee"
+          "<%= config.app %>/workers/{,*/}*.coffee"
           "<%= config.app %>/images/{,*/}*"
         ]
 

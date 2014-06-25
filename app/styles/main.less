@@ -8,41 +8,128 @@
 @fg: rgb(6, 150, 6);
 @bg: rgb(22, 22, 22);
 
+html, html a, html input, html select {
+  font-family: Monospace, Helvetica, Arial, sans-serif;
+}
+
 body {
   background: @bg;
   color: @fg;
+  overflow: hidden;
+}
 
+input, select, option {
+    border: 2px solid @fg;
+    background: @bg;
+    color: @fg;
+    margin: 8px 0 0 0;
+  &:hover {
+    background: @fg;
+    color: @bg;
+  }
+}
 
-  font-family: Monospace, Helvetica, Arial, sans-serif;
+/*#############
+#   HEADER    #
+#############*/
+
+#header {
+  text-align: center;
+  width:100%;
+  input, select, option { border-bottom: 0 solid @fg; }
+  #selectItems { float: left; }
+  #new { float: right; }
+
+}
+
+/*##############
+#   OPTIONS    #
+##############*/
+.options {
+  border-top: 6px solid @fg;
+  height:10%;
+  .row {
+    padding-left: 10px;
+    span {
+      min-width: 160px;
+      position: relative;
+      display: inline-block;
+      text-align: inherit;
+    }
+  }
 }
 
 /*#############
 #   PATTERN   #
 #############*/
+#activePtnInput {
+  //position: fixed;
+  border:0;
+  padding:0;
+  margin:0;
+}
+
+#ptnPosition {
+  width: 98%;
+  height: 3px;
+  background: @fg;
+  position: relative;
+  z-index: 9999;
+  top: 0px;
+  -webkit-animation-name: ptnPosAni;
+  -webkit-animation-duration: 3.75s;
+  -webkit-animation-timing-function: linear;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-play-state: running;
+  /* Standard syntax */
+  animation-name: ptnPosAni;
+  animation-duration: 3.75s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: running;
+}
+
+@keyframes ptnPosAni {
+    0%   {top:0px;}
+    100% {top:100px;}
+}
+
 #pattern {
-    border-top: 1px solid @fg;
-    border-left: 1px solid @fg;
+    border-left: 2px solid @fg;
+    height:100%;
+    //position: fixed;
+    width: 100%;
+    margin:0;padding:0;
+    box-sizing: border-box;
 
-    position: fixed;
-    top: 20%;
-    height: 80%;
-    overflow-y: scroll;
-    width: 99%;
+    .data {
+      border-top: 6px solid @fg;
+      width: 99%;
+      position: relative;
+      height: 80%;
+      overflow-y: scroll;
 
+      tr.active {
+        background: @fg;
+        color: @bg;
+      }
 
-    table td, table th{
-      border-right: 1px solid @fg;
-      margin: 0;
-      padding: 2px 8px;
-    }
+      table td, table th {
+        border-right: 1px solid @fg;
+        margin: 0;
+        //padding: 2px 8px;
+        // width: 7.692%;
+        // display: inline-block;
+      }
+      table thead th {
+        border-bottom: 6px solid @fg;
+        cursor: pointer;
+      }
 
-    table td{
-      border-bottom: 1px dashed @fg;
-      cursor: pointer;
-    }
-    table th{
-      border-bottom: 1px solid @fg;
-      cursor: pointer;
+      table tbody td {
+        border-bottom: 1px dashed @fg;
+        cursor: pointer;
+      }
     }
 }
 

@@ -22,19 +22,44 @@
         <![endif]-->
 
 
-        <div class="hero-unit">
-          <h1>'Allo, 'Allo!</h1>
-          <p>You now have</p>
-          <ul>
-            <li>HTML5 Boilerplate</li>
-          </ul>
+        <div id="header">
+            <select id="selectItems">
+                <option>Select Pattern</option>
+                <option>Click here</option>
+            </select>
+            <input value="MODE: PATTERN" id="patternSong" type="button"/>
+            <input value="NEW" id="new" type="button" />
         </div>
-        <div id="pattern"></div>
+
+        <div id="pattern">
+            <div class="options">
+                <div class="row">
+                    <span id="ptnChannel">ch: 0</span>
+                    <input value="+" id="chPlus" type="button"/>
+                    <input value="-" id="chMinus" type="button" />
+                </div>
+                <div class="row">
+                    <span id="steps">steps: 666</span>
+                    <input value="+" id="stepsPlus" type="button"/>
+                    <input value="-" id="stepsMinus" type="button" />
+                </div>
+              <div class="row">
+                    <span id="tPerStep">tPerStep: 666</span>
+                    <input value="+" id="tStepPlus" type="button"/>
+                    <input value="-" id="tStepMinus" type="button" />
+                </div>
+            </div>
+
+            <div id="ptnPosition"></div>
+            <div class="data">
+            </div>
+        </div>
 
 
         <!-- build:js scripts/vendor.js -->
         <!-- bower:js -->
         <script src="libs/pico/pico.js"></script>
+        <script src="libs/audiolib.js"></script>
         <!-- endbower -->
         <!-- endbuild -->
 

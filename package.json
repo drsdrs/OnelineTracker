@@ -1,7 +1,9 @@
 {
   "name": "yoman-tests",
   "version": "0.0.0",
-  "dependencies": {},
+  "dependencies": {
+    "audiolib": "~0.6.6"
+  },
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-copy": "~0.5.0",
