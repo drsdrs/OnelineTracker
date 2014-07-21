@@ -1,18 +1,12 @@
 window.onload= ->
-  ############ INIT Pattern ##############
+  window.c = console; c.l = c.log
 
-  app.refreshPtnOptions(true)
-  app.renderPattern(app.data.getActivePattern())
-  app.renderPtnOptions(true)
+  initApp()
+  initPlaySnd()
+  app.chMode()
+  app.fs = new app.helpers.FileStorrage()
 
-  ############## INIT ############
-
-  app.testFormula("t*t")
-  app.testFormula("tc((t")
-
-  app.initAnimation()
   #app.play()
-  #app.animateRow()
 
 
 

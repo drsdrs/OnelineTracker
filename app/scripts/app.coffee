@@ -1,207 +1,106 @@
-window.c = console
-window.c.l = c.log
-app = {}
-window.app = app
+if !app? then window.app = {}
+app.getMaxOfArray = (arr)-> Math.max.apply(null, arr)
+app.getMinOfArray = (arr)-> Math.min.apply(null, arr)
 
-########### MODELS ###################
-class Event
-  constructor: (obj) ->
-    @rstT= false; @funct= "="
-    @oct= "="; @note= "="; @vel= "="
-    @DLYfdb= "="; @DLYdepth= "="
-    for key, val of obj then if @[key]? then @[key]=val
 
-class Pattern
-  constructor: (obj) ->
-    @name= "new pattern"
-    @color= "#f48"
-    @tPerStep= 8192
-    @steps= 16
-    @data= [
-      new Event note: 0, funct: "17999999/t", rstT: true
-      new Event note: 0, funct: "t|t>>2"
-      new Event note: 1
-      new Event note: 0
-      new Event note: 0, funct: "7999999/t", rstT: true
-      new Event note: 0, funct: "t|t>>2"
-      new Event note: 0
-      new Event note: 0
-      new Event note: 2, funct: "17999999/t", rstT: true
-      new Event note: 0, funct: "t|t>>2"
-      new Event note: 0
-      new Event note: 0
-      new Event note: 0, funct: "7999999/t", rstT: true
-      new Event note: 0, funct: "t|t>>2"
-      new Event note: 0
-      new Event note: 0
+app.chMode= (mode)->
+  document.getElementById("error").innerHTML= ""
+  if mode? then app.activeMode = mode
+  else mode = app.activeMode
+  if mode is "ptn"
+    app.refreshPtnOptions()
+    app.refreshSelect()
+    app.renderPattern(app.getActivePattern())
+    document.getElementById("ptnOptions").className = "show"
+  else if mode is "funct"
+    document.getElementById("ptnOptions").className = ""
+    app.renderFunct()
+  else if mode is "sng"
+    document.getElementById("ptnOptions").className = ""
+    app.renderSong()
 
+
+app.initDefaults = ->
+  Pattern = app.models.Pattern
+  Funct = app.models.Funct
+  Song = app.models.Song
+  app.modes= {}
+  app.modes.ptn =
+    activeCh: 0
+    data: [
+      new Pattern id:0, name: "pattern 1", data: []
+      new Pattern id:1, steps: 8, name: "hihats+noise", data: []
+      new Pattern id:2, tPerStep: 2048, name: "effects", data: []
+      new Pattern id:3, name: "beats", data: []
+      new Pattern id:4, name: "synth", data: []
+      new Pattern id:5, name: "lead", data: []
     ]
-    for key, val of obj then if @[key]? then @[key]=val
+    selPatterns:[ 0, 1, 2, 3, 4, 5 ]
 
-app.data =
-  mode: "pattern"
-  activeCh: 0
-  selPatterns:[ 0, 1, 2, 3, 4, 5 ]
-  patterns: [
-    new Pattern, new Pattern, new Pattern
-    new Pattern, new Pattern, new Pattern
-  ]
-  getActivePattern: -> @patterns[@selPatterns[@activeCh]]
-  songView: null
-  songs: [ null, null]
+  app.modes.funct =
+    data: [ new Funct ]
 
-####################################
-##  render pattern load options    #
-####################################
-app.renderPtnOptions = (pattOrSong)->
-  if pattOrSong==true
-    type= "PATTERN"
-    data= "patterns"
-  else
-    type= "SONG"
-    data= "songs"
+  app.modes.sng =
+    data: [ new Song ]
 
-  sel = document.getElementById "selectItems"
-  options = "<option>SELECT "+type+"</option>"
-  for item in app.data[data] then options += "<option>"+item.name+"</option>"
-  sel.innerHTML = options
+window.initApp = ->
+  app.name= "onelineTracker"
+  app.activeMode= "ptn"
 
 
-###################################
+  modesLoadet = app.ls.load()
+  if modesLoadet? && modesLoadet isnt false then app.modes = modesLoadet
+  else app.initDefaults()
+  window.onbeforeunload = ->
+    app.ls.save(app.modes)
+  app.getPatternById= (id)->
+    for ptn in app.modes.ptn.data then if ptn.id is id then return ptn
+  app.getActivePattern= (ch)->
+    pos = if ch? then ch else app.modes.ptn.activeCh
+    id = app.modes.ptn.selPatterns[ pos ]
+    app.getPatternById(id)
+  app.getActivePatterns= ->
+    ptns = []
+    for ptnId, i in app.modes.ptn.selPatterns
+      ptns[ptnId] = app.getActivePattern(i)
 
-# playBuffer =
-#   rst: ->
-#     ptn = app.data.getActivePattern()
-#     @t = 0
-#     @tPerStep = ptn.tPerStep
-#     @steps = ptn.steps
-#     @buff = @buffNext||@buff
-#     @buffLen = @tPerStep*@steps
-#     #@setNextRowActive(ptn.steps-1)
-    
-#   tPerStep: app.data.getActivePattern().tPerStep
-#   steps: app.data.getActivePattern().steps
-#   activeRow: 0
-#   buffLen: @tPerStep*@steps
-#   buff: new Float32Array(@buffLen)
-#   buffNxt: null
-#   t: 0
-#   nextRound: ->
-#     @t = 0
-#     @buff = @buffNxt || @buff
-#     @buffLen = @buff.length
-#     calcPtn.postMessage(JSON.stringify app.data.getActivePattern())
-#     animateRow(@buff.length)
-    
-#   process: (L, R) ->
-#     i= 0
-#     while i<L.length
-#       L[i] = @buff[@t]
-#       R[i] = @buff[@t+1]
-#       L[i] = R[i] = 0
-#       if @t>@buffLen then return @nextRound()
-#       @t+=2
-#       i++
-          
-# pico.setup({samplerate:8000})
-
-#########  animation  #############
-ptnPos= null
-ptnTable= null
-offset = 0
-height = 0
-oldLen = 99990
-app.initAnimation = ->
-  ptnPos= document.getElementById("ptnPosition")
-  ptnTable= document.getElementsByClassName("data")[0].childNodes[0]
-  offset =  ptnTable.childNodes[0].offsetHeight
-  height =  ptnTable.childNodes[1].offsetHeight
-  rules = document.styleSheets[0].rules
-  animateRow()
-
-activeRow = 0
-animateRow = (len)->
-  activeEls = document.getElementsByClassName "active"
-  if activeEls.length>0 then activeEls[0].className = ""
-  activeEl = document.getElementById "row"+activeRow
-  activeEl.className = "active"
-  activeRow = (++activeRow%16)
-  # if oldLen is len then return false
-  # oldLen = len
-  # ptnPos.parentNode.replaceChild(ptnPos.cloneNode(true), ptnPos)
-  # ptnPos.style.webkitAnimationName = "none"
-  # ptnPos.style.animationName = "none"
-  # ptnPos.style.webkitAnimationDuration = (len/44100)+"s"
-  # ptnPos.style.animationDuration = (len/44100)+"s"
-  # setTimeout (->
-  #   keyframes = findKeyframesRule("ptnPosAni")
-  #   keyframes.deleteRule("0%")
-  #   keyframes.deleteRule("100%")
-  #   keyframes.insertRule("0% {top: "+offset+"px;}")
-  #   keyframes.insertRule("100% {top: "+(offset+height)+"px;}")
-  #   c.l height
-  #   ptnPos.style.webkitAnimationName = "ptnPosAni"
-  #   ptnPos= document.getElementById("ptnPosition")
-
-  # ), 0
-  # window.requestAnimationFrame (time) -> animateRow()
-########## workers #################
-
-calcPtn = new Worker "workers/calcPtn.js"
-tester = new Worker "workers/testFormula.js"
-
-app.testFormula = (formula)-> tester.postMessage(formula)
-
-tester.onmessage = (e)->
-  c.l "tester says: "+e.data
-
-############################
-
-calcPtn.onmessage = (e)->
-  if !dev? then return initDev()
-  dev.writeBufferSync e.data
-
-app.play = ->
-  jsonPtn = JSON.stringify app.data.getActivePattern()
-  calcPtn.postMessage(jsonPtn)
-
-app.stop = ->
-  dev.kill()
-
-################################################
-
-dev= undefined
-swt= false
-initDev = ->
-  tPerStep= app.data.getActivePattern().tPerStep
-  c.l tPerStep
-  dev = audioLib.Sink null
-  app.dev = dev
-  timeDiff= dev.getPlaybackTime()
-  dev.on "audioprocess", (e)->
-    time = dev.getPlaybackTime()
-    if time>(timeDiff+(tPerStep/16))
-      animateRow()
-      timeDiff = time
-    if @getSyncWriteOffset()<1024 && swt
-      #'animateRow(playBuffer.buffLen)
-      app.play()
-      swt= false
-    else if swt isnt true then swt = true
-
-playBuffer =
-  tPerStep: app.data.getActivePattern().tPerStep
-  steps: app.data.getActivePattern().steps
-  activeRow: 0
-  buffLen: @tPerStep*@steps
-  buff: new Float32Array(@buffLen)
-  buffNxt: null
-  t: 0
-  swt: true
+###################
+## TOP VIEW EVENTS
+###################
 
 
-###################################
-  
-app.initDev = initDev
-app.playBuffer = playBuffer
-app.animateRow = animateRow
+### ch mode btn event ###
+chModeEl = document.getElementById "chMode"
+chMode = (e)->
+  mode = e.target.value.split(" ").pop()
+  if mode is "PATTERN"
+    app.chMode "funct"
+    e.target.value = "MODE: FUNCTION"
+  else if mode is "FUNCTION"
+    app.chMode "sng"
+    e.target.value = "MODE: SONG"
+  else if mode is "SONG"
+    app.chMode "ptn"
+    e.target.value = "MODE: PATTERN"
+
+chModeEl.addEventListener "click", chMode, true
+
+### EN/DISABLE DOCS ###
+docsEl = document.getElementById("docs")
+document.getElementById("toggleDocs").addEventListener "click", ->
+  docsEl.className = if docsEl.className is "show" then "" else "show"
+
+### RESET APP ###
+document.getElementById("reset").addEventListener "click", ->
+  if confirm("Really reset data ??")
+    app.initDefaults()
+    app.chMode()
+
+document.getElementById("play").addEventListener "click", -> app.play()
+document.getElementById("rec").addEventListener "click", -> app.rec()
+
+
+document.getElementById("save2file").addEventListener "click", ->
+  app.fs.download("song.json", app.modes)
+document.getElementById("loadFile").addEventListener "click", ->
+  document.getElementById("fileInput").click()

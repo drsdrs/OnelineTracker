@@ -14,52 +14,108 @@
         <!-- endbuild -->
         <!-- build:css(.tmp) styles/main.css -->
         <link rel="stylesheet" href="styles/main.css">
+        <link rel="stylesheet" href="styles/jquery-ui.min.css">
         <!-- endbuild -->
     </head>
-    <body>
+    <body oncontextmenu="return false">
         <!--[if lt IE 10]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
 
         <div id="header">
-            <select id="selectItems">
-                <option>Select Pattern</option>
-                <option>Click here</option>
-            </select>
-            <input value="MODE: PATTERN" id="patternSong" type="button"/>
-            <input value="NEW" id="new" type="button" />
+            <input value="DOCS &#5872;" id="toggleDocs" type="button"/>
+            <input value="RESET ☠" id="reset" type="button"/>
+            <input value="LOAD FILE ☣" id="loadFile" type="button"/><input value="LOAD FILE HIDDEN" id="fileInput" type="file"/ class="hidden">
+            <input value="SAVE FILE ❁" id="save2file" type="button"/>
+            <input value="REC ☢" id="rec" type="button"/>
+            <input value="MODE: PATTERN" id="chMode" type="button"/>
+            <input value="PLAY ⚶" id="play" type="button"/>
         </div>
 
-        <div id="pattern">
-            <div class="options">
-                <div class="row">
-                    <span id="ptnChannel">ch: 0</span>
-                    <input value="+" id="chPlus" type="button"/>
-                    <input value="-" id="chMinus" type="button" />
+        <div id="options">
+            <div id="ptnOptions">
+                <div class="col6 pull-left">
+                    <div class="row">
+                        <span id="ptnChannel">ch: 0</span>
+                        <input value="-" id="chMinus" type="button" />
+                        <input value="+" id="chPlus" type="button"/>
+                        <label>Vol:&nbsp;<input value="50" id="volume" type="text"/></label>
+                    </div>
+                    <div class="row">
+                        steps: <input type="text" id="steps" value="0" />
+                        <input value="-" id="stepsMinus" type="button" />
+                        <input value="+" id="stepsPlus" type="button"/>
+                        <input value="+C" id="stepsPlusCopy" type="button"/>
+                    </div>
+                    <div class="row">
+                        <span id="tPerStep">tPerStep: </span>
+                        <input value="-" id="tStepMinus" type="button" />
+                        <input value="+" id="tStepPlus" type="button"/>
+                        <input value="MUTE" id="mute" type="button"/>
+                        <input value="SOLO" id="single" type="button"/>
+                    </div>
                 </div>
-                <div class="row">
-                    <span id="steps">steps: 666</span>
-                    <input value="+" id="stepsPlus" type="button"/>
-                    <input value="-" id="stepsMinus" type="button" />
+                <div class="col6 pull-right">
+                    <div class="row">
+                        <input value="NEW" class="p30" id="newPtn" type="button" />
+                        <input value="COPY" class="p30" id="copyPtn" type="button" />
+                        <input value="DELETE" class="p30" id="deletePtn" type="button" />
+                    </div>
+                    <div class="row">
+                        <span>name: </span>
+                        <input value="" id="ptnName" type="text"/>
+                    </div>
+                    <div class="row">
+                        <span>change: </span>
+                        <select class="selectItems"></select>
+                    </div>
                 </div>
-              <div class="row">
-                    <span id="tPerStep">tPerStep: 666</span>
-                    <input value="+" id="tStepPlus" type="button"/>
-                    <input value="-" id="tStepMinus" type="button" />
-                </div>
-            </div>
-
-            <div id="ptnPosition"></div>
-            <div class="data">
+                <div class="clear"></div>
             </div>
         </div>
 
+        <div id="data"></div>
+
+        <div id="docs">
+            <h1>DOCUMENTATION
+            </h1>
+                <a class="button" href="#docsPattern" >docsPattern</a>
+                <a class="button" href="#docsFunct" >docsFunct</a>
+                <a class="button" href="#docsSong" >docsSong</a>
+            <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+            <h2 id="docsPattern">PATTERN MODE</h2>
+            <p>Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, con duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. 
+            Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulpu duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. 
+            Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulpu duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. 
+            Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulpusectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. 
+            Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.</p>
+
+            <h2 id="docsFunct">FUNCTION MODE</h2>
+            </p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justsanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirm ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd guber ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd guber ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd guber ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd guberod tempor invidunt ut labor ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubere et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+
+            Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</p>
+            <h2 id="docsSong">SONG MODE</h2>
+            <p>Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.
+n vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzn vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzn vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzn vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zz
+            Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.
+
+            Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis.</p>
+
+        </div>
+
+        <canvas id="canvasVisual"></canvas>
+
+        <div id="footer">
+            <span id="error"></span>
+        </div>
 
         <!-- build:js scripts/vendor.js -->
         <!-- bower:js -->
-        <script src="libs/pico/pico.js"></script>
+        <!-- <script src="libs/pico/pico.js"></script>-->
         <script src="libs/audiolib.js"></script>
+        <script src="libs/jquery.min.js"></script>
+        <script src="libs/jquery-ui.min.js"></script>
         <!-- endbower -->
         <!-- endbuild -->
 
