@@ -20,7 +20,7 @@ class app.models.Pattern
     @id= Date.now()+""+~~(Math.random()*666666)
     @name= "new pattern"
     @tPerStep= 8192
-    @steps= 3
+    @steps= 4
     @volume= 25
     @mute = false
     @data= []
