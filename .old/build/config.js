@@ -1,1 +1,0 @@
-require.config({deps:["main"],paths:{require:"lib/requirejs/require.js",require:"lib/requirejs/require.js",cs:"lib/require-cs/cs",pico:"libN/node-pico/pico",text:"lib/requirejs-text/text"},packages:[{name:"cs",location:"lib/require-cs",main:"cs"},{name:"coffee-script",location:"lib/coffee-script",main:"index"}]});
