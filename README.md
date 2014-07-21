@@ -1,7 +1,12 @@
 OnelineTracker
 ==============
-
 Music from oneliners - trackerversion
 
+Installation
+-----------
+npm install && bower install
 
-more infos comming soon ...
+Available tasks
+------------
+grunt serve
+grunt build
