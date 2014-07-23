@@ -44,10 +44,10 @@ app.renderPattern = (ptn)->
         posCode = (rows+1)%div1
         txt = ""
 
-        if (rows+1)%div1 is 0 then txt = "++++"
-        else if (rows+1)%(div1/2) is 0 then txt = "+++"
+        if (rows+1)%div1 is 0 then txt = "####"
+        else if (rows+1)%(div1/2) is 0 then txt = "###"
         else if (rows+1)%(div1/4) is 0 then txt = "++"
-        else if (rows+1)%(div1/8) is 0 then txt = "+"
+        else if (rows+1)%(div1/8) is 0 then txt = "--"
         else if (rows+1)%(div1/16) is 0 then txt = "-"
         td.innerHTML = txt
       else if type=="rstT"
