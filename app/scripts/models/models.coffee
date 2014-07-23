@@ -9,15 +9,15 @@ class app.models.Step
     @oct= "="
     @note= "="
     @vel= "="
-    @aModSpeed= "="
-    @aModDepth= "="
-    @pModSpeed= "="
-    @pModDepth= "="
+    @AMspeed= "="
+    @AMdepth= "="
+    @PMspeed= "="
+    @PMdepth= "="
     for key, val of obj then if @[key]? then @[key]= val
 
 class app.models.Pattern
   constructor: (obj) ->
-    @id= Date.now()+""+~~(Math.random()*666666)
+    @id= Date.now()+"."+~~(Math.random()*666666)
     @name= "new pattern"
     @tPerStep= 8192
     @steps= 4

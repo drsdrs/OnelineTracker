@@ -33,11 +33,11 @@ arr = []
 functs = {}
 
 setDefaults = ->
-  step = [0,0,0,0,0,0]
-  oct = [0,0,0,0,0,0]
-  note = [0,0,0,0,0,0]
-  vel = [100,100,100,100,100,100]
-  funct = ["1023","1023","1023","1023","1023","1023"]
+  #step = [0,0,0,0,0,0]
+  #oct = [0,0,0,0,0,0]
+  #note = [0,0,0,0,0,0]
+  #vel = [100,100,100,100,100,100]
+  #funct = ["1023","1023","1023","1023","1023","1023"]
 
 
 replaceShortcuts = (formula)->
@@ -83,7 +83,6 @@ setAndFill = (ptn, ch, offset)->
 ########################
 self.addEventListener "message", ((e) ->
   ptns = JSON.parse e.data.ptns
-
   functs = JSON.parse e.data.functs
   if e.data.rst is true then setDefaults()
   # TODO find way to save reset Steps

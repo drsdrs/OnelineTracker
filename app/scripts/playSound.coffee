@@ -5,7 +5,8 @@ window.initPlaySnd= ->
   calcPtn = new Worker "workers/calcPtn.js"
   cv = new app.CanvasVisual "canvasVisual"
   dev = null
-  app.recordObj = null
+  recordObj = null
+  app.stop = false
 
   app.cv = cv
   calcPtn.onmessage = (e)->
@@ -24,18 +25,35 @@ window.initPlaySnd= ->
   ################################################
 
   app.rec = ->
-    return c.l "have to implement better way ..."
     if !dev? then return initDev()
-    if app.recordObj==null then app.recordObj = dev.record()
+    if recordObj?.active
+      recordObj.stop()
+      recordObj.exportWav ((blob) ->
+        saveWaveToFile "newWave.wav", Sink.createDynURL.createBlob(blob)
+        recordObj.clear()
+        @disabled = false
+        return
+      ).bind(this)
+      @disabled = true
     else
-      app.recordObj.stop()
-      #wav = 'data:audio/wav;base64,'+btoa(app.recordObj.toWav())
-      wav = 'data:application/octet-stream,'+btoa(app.recordObj.toWav())
-      newWindow = window.open(wav, "*.wav")
+      if recordObj==null then recordObj= dev.createRecorder()
+      recordObj.start()
 
+  saveWaveToFile= (filename, link) ->
 
+    r = new XMLHttpRequest()
+    r.open "GET", link, true
+    r.onreadystatechange = ->
+      return  if r.readyState isnt 4 or r.status isnt 200
+      el = document.createElement("a")
+      el.setAttribute(
+        "href", "data:audio/wav;charset=utf-8,"+(r.responseText)
+      )
+      c.l r
+      el.setAttribute "download", filename
+      el.click()
 
-
+    r.send()
 
 
   ################################################
@@ -48,13 +66,13 @@ window.initPlaySnd= ->
     sampleRate= 44100
     app.play()
     tPerStep = app.getActivePattern().tPerStep/32
-    dev = audioLib.Sink(null, channelCount, preBufferSize, sampleRate)
+    dev = Sink(null, channelCount, preBufferSize, sampleRate)
     app.dev = dev
     dev.on "audioprocess", (e)->
       #c.l @getPlaybackTime()
       if @getSyncWriteOffset()<(preBufferSize*4) and swt
         app.cv.drawArea(lastBuff)
-        app.play()
+        if app.stop is false then app.play()
         swt= false
       else if swt isnt true then swt = true
 

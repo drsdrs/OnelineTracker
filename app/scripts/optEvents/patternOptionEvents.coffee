@@ -1,5 +1,30 @@
 if !app? then window.app = {}
 
+##~~~~ VOLUME EVENTS ~~~~##
+volumeEl = document.getElementById "volume"
+muteEl = document.getElementById "mute"
+singleEl = document.getElementById "single"
+
+mute = -> app.getActivePattern().mute = true
+
+single = ->
+  muteAll()
+  app.getActivePattern().mute = false
+
+muteAll = ->
+  for ptn, i in app.getActivePatterns() then ptn.mute = true
+
+setVolume = ()->
+  val = ~~(volumeEl.value)
+  if val<0 then val = 0 else if val>100 then val = 100
+  volumeEl.value = val
+  app.getActivePattern().volume = val
+getVolume = ()-> volumeEl.value = app.getActivePattern().volume
+
+muteEl.addEventListener "click", mute, false
+singleEl.addEventListener "click", single, false
+volumeEl.addEventListener "change", setVolume, false
+
 ##~~~~ BUTTON EVENTS ~~~~##
 newPtnEl = document.getElementById "newPtn"
 copyPtnEl = document.getElementById "copyPtn"
@@ -73,6 +98,8 @@ chMinusEl.addEventListener "click", chMinus, false
 stepsEl = document.getElementById "steps"
 stepsPlusEl = document.getElementById "stepsPlus"
 stepsPlusCopyEl = document.getElementById "stepsPlusCopy"
+stepsPlusSplitEl = document.getElementById "stepsPlusSplit"
+stepsMinusJoinEl = document.getElementById "stepsMinusJoin"
 stepsMinusEl = document.getElementById "stepsMinus"
 
 stepsPlus = ->
@@ -85,9 +112,27 @@ stepsPlusCopy = ->
   for step, i in ptn.data
     if ptn.data[i]? then ptn.data[i+len]= new app.models.Step ptn.data[i]
   stepsPlus()
+stepsPlusSplit = ->
+  ptn = app.getActivePattern()
+  newData = []
+  len = ptn.steps
+  for step, i in ptn.data
+    if ptn.data[i]?
+      newData[i*2]= new app.models.Step ptn.data[i]
+  ptn.data = newData
+  stepsPlus()
+stepsMinusJoin = ->
+  ptn = app.getActivePattern()
+  newData = []
+  len = ptn.steps
+  for step, i in ptn.data
+    if ptn.data[i]? and (i/2)%1 is 0
+      newData[i/2]= new app.models.Step ptn.data[i]
+  ptn.data = newData
+  stepsMinus()
 stepsMinus = ->
   ptn = app.getActivePattern()
-  if ptn.steps>2 then ptn.steps /= 2
+  if ptn.steps>2 and (ptn.steps / 2)%1 is 0 then ptn.steps /= 2
   chStepsPtn(ptn)
 chStepsPtn = (ptn)->
   stepsEl.value = ptn.steps
@@ -95,11 +140,15 @@ chStepsPtn = (ptn)->
 
 chInputVal = (e)->
   ptn = app.getActivePattern()
-  ptn.steps = e.target.value
+  val = e.target.value
+  if val>0 then ptn.steps = val
+  else e.target.value = 1; ptn.steps = 1
   app.renderPattern(ptn)
 
 stepsPlusEl.addEventListener "click", stepsPlus, false
 stepsPlusCopyEl.addEventListener "click", stepsPlusCopy, false
+stepsPlusSplitEl.addEventListener "click", stepsPlusSplit, false
+stepsMinusJoinEl.addEventListener "click", stepsMinusJoin, false
 stepsMinusEl.addEventListener "click", stepsMinus, false
 stepsEl.addEventListener "change", chInputVal, false
 
@@ -173,3 +222,4 @@ app.refreshPtnOptions = (chToo)->
   chTStepPtn(ptn)
   @refreshSelect()
   getName()
+  getVolume()

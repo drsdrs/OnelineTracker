@@ -7,7 +7,6 @@ keyUp = (e)->
   e.stopPropagation()
   k = e.keyCode
 
-
   if k is 111 then chMinus() # *
   else if k is 106 then chPlus() # /
   else if k is 104 then stepsMinus() # 8
@@ -57,7 +56,6 @@ keyUp = (e)->
 keyDown = (e)->
   e.stopPropagation()
   k = e.keyCode
-  c.l k
   if k is 16 then downKey = "shift"
   else if k is 17 then downKey = "ctrl"
 

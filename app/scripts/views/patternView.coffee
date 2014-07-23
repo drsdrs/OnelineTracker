@@ -6,8 +6,8 @@ Step = app.models.Step
 app.renderPattern = (ptn)->
   headers = [
     "Tpos", "pos", "hlp", "rstT", "funct", "oct"
-    "note", "vel", "aModSpeed", "aModDepth"
-    , "pModSpeed", "pModDepth"
+    "note", "vel", "AMspeed", "AMdepth"
+    , "PMspeed", "PMdepth"
   ]
 
   COLS  = headers.length

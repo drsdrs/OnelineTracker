@@ -2,7 +2,6 @@
   "name": "yoman-tests",
   "version": "0.0.0",
   "dependencies": {
-    "audiolib": "~0.6.6",
     "grunt-coffeelint": "0.0.10"
   },
   "devDependencies": {

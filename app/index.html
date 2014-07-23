@@ -17,7 +17,7 @@
         <link rel="stylesheet" href="styles/jquery-ui.min.css">
         <!-- endbuild -->
     </head>
-    <body oncontextmenu="return false">
+    <body>
         <!--[if lt IE 10]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
@@ -31,6 +31,7 @@
             <input value="REC ☢" id="rec" type="button"/>
             <input value="MODE: PATTERN" id="chMode" type="button"/>
             <input value="PLAY ⚶" id="play" type="button"/>
+            <input value="STOP ⚶" id="stop" type="button"/>
         </div>
 
         <div id="options">
@@ -46,6 +47,8 @@
                         steps: <input type="text" id="steps" value="0" />
                         <input value="-" id="stepsMinus" type="button" />
                         <input value="+" id="stepsPlus" type="button"/>
+                        <input value="-S" id="stepsMinusJoin" type="button"/>
+                        <input value="+S" id="stepsPlusSplit" type="button"/>
                         <input value="+C" id="stepsPlusCopy" type="button"/>
                     </div>
                     <div class="row">
@@ -114,6 +117,7 @@ n vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla fac
         <!-- bower:js -->
         <!-- <script src="libs/pico/pico.js"></script>-->
         <script src="libs/audiolib.js"></script>
+        <script src="libs/recorder.js"></script>
         <script src="libs/jquery.min.js"></script>
         <script src="libs/jquery-ui.min.js"></script>
         <!-- endbower -->
