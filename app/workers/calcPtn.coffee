@@ -3,6 +3,8 @@ c= console; c.l = c.log
 makeSampleFunction = (formula)-> new Function("t", "return "+formula)
 
 getNm = (octave, note) ->
+  ml = Math.pow(2, octave)
+  return ml = ml + ((ml / 12) * note)
   if octave >= 0 then multiplicator = 1 << octave
   else multiplicator = 1 / (1 << -octave)
   multiplicator + ((multiplicator / 12) * note)
