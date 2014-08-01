@@ -3,16 +3,49 @@ if !app? then window.app = {}
 ##~~~~ VOLUME EVENTS ~~~~##
 volumeEl = document.getElementById "volume"
 muteEl = document.getElementById "mute"
-singleEl = document.getElementById "single"
+soloEl = document.getElementById "single"
 
-mute = -> app.getActivePattern().mute = true
+muteIt = (checkOnly)->
+  mute = app.getActivePattern().mute
+  solo = app.getActivePattern().solo
+  ptns = app.getActivePatterns()
+  if checkOnly isnt true
+    mute = !mute
+    if solo is true
+      for ptn in ptns then ptn.mute = false
+      app.getActivePattern().solo = false
+    for ptn in ptns then ptn.solo = false
+    app.getActivePattern().mute = mute
+  if mute then muteEl.className = "active" else muteEl.className = ""
+  soloEl.className = ""
 
-single = ->
-  muteAll()
+soloIt = (checkOnly)->
+  solo = app.getActivePattern().solo
+  mute = app.getActivePattern().mute
+  ptns = app.getActivePatterns()
+  if mute then muteIt
+  if checkOnly isnt true
+    solo = !solo
+    for ptn in ptns then ptn.mute = solo
+    if solo is true
+      for ptn in ptns then ptn.solo = false
+      app.getActivePattern().mute = false
+    app.getActivePattern().solo = solo
+  if solo
+    soloEl.className = "active"
+    muteEl.className = ""
+  else
+    soloEl.className = ""
+
+muteAll = (mute)->
+  c.l "muteall"
+  for ptn, i in app.getActivePatterns()
+    ptn.mute = true
+    ptn.solo = false
   app.getActivePattern().mute = false
+  app.getActivePattern().solo = true
 
-muteAll = ->
-  for ptn, i in app.getActivePatterns() then ptn.mute = true
+
 
 setVolume = ()->
   val = ~~(volumeEl.value)
@@ -21,8 +54,8 @@ setVolume = ()->
   app.getActivePattern().volume = val
 getVolume = ()-> volumeEl.value = app.getActivePattern().volume
 
-muteEl.addEventListener "click", mute, false
-singleEl.addEventListener "click", single, false
+muteEl.addEventListener "click", muteIt, false
+soloEl.addEventListener "click", soloIt, false
 volumeEl.addEventListener "change", setVolume, false
 
 ##~~~~ BUTTON EVENTS ~~~~##
@@ -192,8 +225,9 @@ selectEl = document.getElementsByClassName("selectItems")[0]
 
 chSelItem = (e)->
   ptnMd = app.modes.ptn
+  ptnName = e.target.value.split(":").pop()
   for p in ptnMd.data
-    if p.name is e.target.value then ptn = p
+    if p.name is ptnName then ptn = p
   ptnMd.selPatterns[ptnMd.activeCh] = ptn.id
   app.refreshPtnOptions()
 
@@ -208,9 +242,19 @@ app.refreshSelect = ->
   option.disabled = true
   option.innerHTML = "SELECT PATTERN"
   selectEl.appendChild option
-  for item in app.modes.ptn.data
+  selPatterns = app.modes.ptn.selPatterns
+  ptns = app.getActivePatterns()
+  for ptn in app.modes.ptn.data
     option = document.createElement "option"
-    option.innerHTML = item.name
+    option.innerHTML = "-"
+    for ptnId, i in selPatterns
+      if ptnId is ptn.id
+        if option.innerHTML is "-"
+          option.innerHTML = i
+        else option.innerHTML += "+"+i
+    option.innerHTML += ":"
+    option.innerHTML += if ptn.mute then "M" else if ptn.solo then "S" else "_"
+    option.innerHTML += ":"+ptn.name
     selectEl.appendChild option
 
 #######################################################
@@ -223,3 +267,5 @@ app.refreshPtnOptions = (chToo)->
   @refreshSelect()
   getName()
   getVolume()
+  muteIt(true)
+  soloIt(true)

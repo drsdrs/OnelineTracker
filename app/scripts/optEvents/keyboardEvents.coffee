@@ -6,6 +6,7 @@ downKey = ""
 keyUp = (e)->
   e.stopPropagation()
   k = e.keyCode
+  el = document.getElementById("activePtnInput")
 
   if k is 111 then chMinus() # *
   else if k is 106 then chPlus() # /
@@ -13,6 +14,9 @@ keyUp = (e)->
   else if k is 105 then stepsPlus() # 9
   else if k is 101 then tStepMinus() # 5
   else if k is 102 then tStepPlus() # 6
+  else if k is 13# enter key # should select first funct row
+    if el? then el.click()
+    else document.querySelector("#row0 .funct").click()
 
   if downKey is "ctrl"
     if k is 37 then app.chMode "sng" # left
@@ -22,15 +26,14 @@ keyUp = (e)->
     else if k is 13 then alert "you pressed strg+enter, WOW"
   
   else if downKey is "shift"
-    el = document.getElementById("activePtnInput")
     if el?
       type = el.parentNode.className
       if k is 37 # left
         if type is "funct"
           el.parentElement.parentElement
-            .getElementsByClassName("P-ModDepth").item().click()
+            .getElementsByClassName("PMdepth").item().click()
         else el.parentElement.previousSibling.click()
-      else if k is 39 #and type isnt "DLYdepth" # right
+      else if k is 39 # right
         nextEl = el.parentElement.nextSibling
         if nextEl? then nextEl.click()
         else
@@ -48,8 +51,6 @@ keyUp = (e)->
         else document.querySelector("#row0 ."+type).click()
       else if k is 13 # enter key # should submit value
         el.click(e, false)
-    else if k is 13# enter key # should select first funct row
-      document.querySelector("#row0 .funct").click()
 
   if k is 16 or k is 17 then downKey = "none" # reset downKey
 

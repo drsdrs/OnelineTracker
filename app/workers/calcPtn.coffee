@@ -28,9 +28,10 @@ oct = [0,0,0,0,0,0]
 note = [0,0,0,0,0,0]
 vel = [100,100,100,100,100,100]
 funct = ["1023","1023","1023","1023","1023","1023"]
-minlength = 8192*4
+minlength = 4096*4
 arr = []
 functs = {}
+audioBuff = []
 
 setDefaults = ->
   #step = [0,0,0,0,0,0]
@@ -84,6 +85,7 @@ setAndFill = (ptn, ch, offset)->
 self.addEventListener "message", ((e) ->
   ptns = JSON.parse e.data.ptns
   functs = JSON.parse e.data.functs
+
   if e.data.rst is true then setDefaults()
   # TODO find way to save reset Steps
 
@@ -92,12 +94,13 @@ self.addEventListener "message", ((e) ->
     arr[channels] = new Float32Array(minlength)
     t = 0
     #step = 0
-    setAndFill(ptns[channels], channels)
+    if ptns[channels].mute is false then setAndFill(ptns[channels], channels)
 
   #merge arrays
   newArr = new Float32Array(minlength)
   len = minlength
   while len--
+    index = len%2
     newArr[len] = (
       arr[0][len]+arr[1][len]+arr[2][len]+
       arr[3][len]+arr[4][len]+arr[5][len]

@@ -23,6 +23,7 @@ class app.models.Pattern
     @steps= 4
     @volume= 25
     @mute = false
+    @solo = false
     @data= []
     for key, val of obj then if @[key]? then @[key]=val
 

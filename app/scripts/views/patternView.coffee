@@ -14,6 +14,7 @@ app.renderPattern = (ptn)->
   ROWS = ptn.steps
   rows = ROWS
   cols  = COLS
+
   # build table
   fragment = document.createDocumentFragment()
   table = fragment.appendChild document.createElement("table")
@@ -82,34 +83,36 @@ parseInput = (val, max)->
 elToSet = {}
 stepToSet = 0
 functToSet = "0"
+removeInput = false
 tester = new Worker "workers/testFormula.js"
 testFormula = (formula)->
   ## build formula
   functs = app.modes.funct.data[0].data
   for key, val of functs
     formula = formula.replace new RegExp(key, 'gi'), "("+val+")"
-  c.l formula
   tester.postMessage(formula)
 tester.onmessage = (e)->
   errorEl = document.getElementById "error"
   if e.data is false
     app.getActivePattern().data[stepToSet].funct = functToSet
-    elToSet.parentNode.innerHTML = functToSet
+    if removeInput is false then elToSet.parentNode.innerHTML = functToSet
     errorEl.innerHTML= ""
   else
     val = app.getActivePattern().data[stepToSet].funct
-    elToSet.parentNode.innerHTML = val
+    if removeInput is false then elToSet.parentNode.innerHTML = val
     errorEl.innerHTML=
       "funct: '"+functToSet+"' at pos: "+stepToSet+"\nERROR: "+e.data
 
 
 toggleInputEl = (e, close)->
+  tagName = e.target.tagName
+  if tagName isnt "TD" and tagName isnt "INPUT"
+    return c.l "some went wrong", e
   el = document.getElementById("activePtnInput")
   typeE = e.target.className
-  if type is "pos" or type is "Tpos" then return false
+  if typeE is "pos" or typeE is "Tpos" or typeE is "hlp" then return false
   # one input is active
   if el isnt null
-    if el? and el.parentNode is e.target.parentNode then return c.l "same"
     #c.l el.parentNode, e.target
     val = el.value
     step = el.parentNode.parentNode.id.split("row")[1]
@@ -124,9 +127,13 @@ toggleInputEl = (e, close)->
       stepToSet = step
       elToSet = el
       functToSet = val
+      if el.parentNode isnt e.target.parentNode then removeInput = false
+      else removeInput = true
       testFormula(val)
     else
       ptn.data[step][type] = val
+      if el? and el.parentNode is e.target.parentNode
+        return c.l "same"
       el.parentNode.innerHTML = val
 
   if typeE is "rstT"

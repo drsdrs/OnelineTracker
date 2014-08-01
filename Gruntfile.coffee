@@ -338,6 +338,10 @@ module.exports = (grunt) ->
 
     coffeelint:
       all: ['<%= config.app %>/scripts/**/*.coffee','<%= config.app %>/workers/**/*.coffee']
+      options:
+        "max_line_length":
+          "level":"ignore"
+
 
     less:
       dev:

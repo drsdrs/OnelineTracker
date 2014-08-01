@@ -37,7 +37,13 @@ input[type=button] {
     background: @fg;
     color: @bg;
   }
+  &.active {
+      background: @fg;
+      color: @fg;
+      text-shadow: 1px 0 1px @bg;
+  }
 }
+
 
 /* common styles */ 
 
