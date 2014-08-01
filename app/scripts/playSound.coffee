@@ -17,10 +17,10 @@ window.initPlaySnd= ->
     output = []
     node.onaudioprocess = (e) ->
       app.play()
-      c.l "huiiii"
       output[0] = e.outputBuffer.getChannelData(0)
       output[1] = e.outputBuffer.getChannelData(1)
       newBuff = preBuffer.shift() || null
+      cv.drawArea newBuff
       if newBuff is null then return c.l "no Buffer"
 
       len = newBuff.length
