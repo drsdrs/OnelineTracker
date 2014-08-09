@@ -1,38 +1,7 @@
 (function() {
-  var chMode, chModeEl, docsEl;
-
   if (typeof app === "undefined" || app === null) {
     window.app = {};
   }
-
-  app.getMaxOfArray = function(arr) {
-    return Math.max.apply(null, arr);
-  };
-
-  app.getMinOfArray = function(arr) {
-    return Math.min.apply(null, arr);
-  };
-
-  app.chMode = function(mode) {
-    document.getElementById("error").innerHTML = "";
-    if (mode != null) {
-      app.activeMode = mode;
-    } else {
-      mode = app.activeMode;
-    }
-    if (mode === "ptn") {
-      app.refreshPtnOptions();
-      app.refreshSelect();
-      app.renderPattern(app.getActivePattern());
-      return document.getElementById("ptnOptions").className = "show";
-    } else if (mode === "funct") {
-      document.getElementById("ptnOptions").className = "";
-      return app.renderFunct();
-    } else if (mode === "sng") {
-      document.getElementById("ptnOptions").className = "";
-      return app.renderSong();
-    }
-  };
 
   app.initDefaults = function() {
     var Funct, Pattern, Song;
@@ -85,6 +54,8 @@
     var modesLoadet;
     app.name = "onelineTracker";
     app.activeMode = "ptn";
+    app.newPatterns = true;
+    app.newFuncts = true;
     modesLoadet = app.ls.load();
     if ((modesLoadet != null) && modesLoadet !== false) {
       app.modes = modesLoadet;
@@ -94,91 +65,25 @@
     window.onbeforeunload = function() {
       return app.ls.save(app.modes);
     };
-    app.getPatternById = function(id) {
-      var ptn, _i, _len, _ref;
-      _ref = app.modes.ptn.data;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        ptn = _ref[_i];
-        if (ptn.id === id) {
-          return ptn;
+    return app.corrSteps = function(ptns) {
+      var i, j, modulo, srcNr, trgNr;
+      i = ptns.length;
+      while (i--) {
+        modulo = ptns[i].steps;
+        srcNr = (step[i] + 1) % modulo;
+        j = ptns.length;
+        while (j--) {
+          trgNr = (step[j] + 1) % modulo;
+          if (trgNr > srcNr) {
+            step[j] += (trgNr - srcNr) & modulo;
+          } else if (trgNr < srcNr) {
+            step[j] += (srcNr - trgNr) % modulo;
+          }
         }
       }
-    };
-    app.getActivePattern = function(ch) {
-      var id, pos;
-      pos = ch != null ? ch : app.modes.ptn.activeCh;
-      id = app.modes.ptn.selPatterns[pos];
-      return app.getPatternById(id);
-    };
-    return app.getActivePatterns = function() {
-      var i, ptnId, ptns, _i, _len, _ref, _results;
-      ptns = [];
-      _ref = app.modes.ptn.selPatterns;
-      _results = [];
-      for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-        ptnId = _ref[i];
-        _results.push(ptns[ptnId] = app.getActivePattern(i));
-      }
-      return _results;
+      return console.log(step);
     };
   };
-
-
-  /* ch mode btn event */
-
-  chModeEl = document.getElementById("chMode");
-
-  chMode = function(e) {
-    var mode;
-    mode = e.target.value.split(" ").pop();
-    if (mode === "PATTERN") {
-      app.chMode("funct");
-      return e.target.value = "MODE: FUNCTION";
-    } else if (mode === "FUNCTION") {
-      app.chMode("sng");
-      return e.target.value = "MODE: SONG";
-    } else if (mode === "SONG") {
-      app.chMode("ptn");
-      return e.target.value = "MODE: PATTERN";
-    }
-  };
-
-  chModeEl.addEventListener("click", chMode, true);
-
-
-  /* EN/DISABLE DOCS */
-
-  docsEl = document.getElementById("docs");
-
-  document.getElementById("toggleDocs").addEventListener("click", function() {
-    return docsEl.className = docsEl.className === "show" ? "" : "show";
-  });
-
-
-  /* RESET APP */
-
-  document.getElementById("reset").addEventListener("click", function() {
-    if (confirm("Really reset data ??")) {
-      app.initDefaults();
-      return app.chMode();
-    }
-  });
-
-  document.getElementById("play").addEventListener("click", function() {
-    return app.play();
-  });
-
-  document.getElementById("rec").addEventListener("click", function() {
-    return app.rec();
-  });
-
-  document.getElementById("save2file").addEventListener("click", function() {
-    return app.fs.download("song.json", app.modes);
-  });
-
-  document.getElementById("loadFile").addEventListener("click", function() {
-    return document.getElementById("fileInput").click();
-  });
 
 }).call(this);
 
@@ -209,8 +114,7 @@
             data = JSON.parse(e.target.result);
             c.l(data);
             app.modes = data;
-            app.chMode();
-            return app.rstSteps = true;
+            return app.chMode();
           };
         })(file);
         return reader.readAsText(file);
@@ -272,6 +176,43 @@
     window.app = {};
   }
 
+  app.getPatternById = function(id) {
+    var ptn, _i, _len, _ref;
+    _ref = app.modes.ptn.data;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      ptn = _ref[_i];
+      if (ptn.id === id) {
+        return ptn;
+      }
+    }
+  };
+
+  app.getActivePattern = function(ch) {
+    var id, pos;
+    pos = ch != null ? ch : app.modes.ptn.activeCh;
+    id = app.modes.ptn.selPatterns[pos];
+    return app.getPatternById(id);
+  };
+
+  app.getActivePatterns = function() {
+    var i, ptnId, ptns, _i, _len, _ref, _results;
+    ptns = [];
+    _ref = app.modes.ptn.selPatterns;
+    _results = [];
+    for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+      ptnId = _ref[i];
+      _results.push(ptns[ptnId] = app.getActivePattern(i));
+    }
+    return _results;
+  };
+
+}).call(this);
+
+(function() {
+  if (typeof app === "undefined" || app === null) {
+    window.app = {};
+  }
+
   app.models = {};
 
   app.models.Step = (function() {
@@ -282,10 +223,10 @@
       this.oct = "=";
       this.note = "=";
       this.vel = "=";
-      this.aModSpeed = "=";
-      this.aModDepth = "=";
-      this.pModSpeed = "=";
-      this.pModDepth = "=";
+      this.AMspeed = "=";
+      this.AMdepth = "=";
+      this.PMspeed = "=";
+      this.PMdepth = "=";
       for (key in obj) {
         val = obj[key];
         if (this[key] != null) {
@@ -301,12 +242,13 @@
   app.models.Pattern = (function() {
     function Pattern(obj) {
       var key, val;
-      this.id = Date.now() + "" + ~~(Math.random() * 666666);
+      this.id = Date.now() + "." + ~~(Math.random() * 666666);
       this.name = "new pattern";
       this.tPerStep = 8192;
       this.steps = 4;
       this.volume = 25;
       this.mute = false;
+      this.solo = false;
       this.data = [];
       for (key in obj) {
         val = obj[key];
@@ -363,9 +305,10 @@
   downKey = "";
 
   keyUp = function(e) {
-    var el, k, lastStep, nextEl, type;
+    var el, k, lastStep, nextEl, type, _ref, _ref1, _ref2;
     e.stopPropagation();
     k = e.keyCode;
+    el = document.getElementById("activePtnInput");
     if (k === 111) {
       chMinus();
     } else if (k === 106) {
@@ -378,6 +321,14 @@
       tStepMinus();
     } else if (k === 102) {
       tStepPlus();
+    } else if (k === 13) {
+      if (el != null) {
+        el.click();
+      } else {
+        if ((_ref = document.querySelector("#row0 .funct")) != null) {
+          _ref.click();
+        }
+      }
     }
     if (downKey === "ctrl") {
       if (k === 37) {
@@ -392,12 +343,11 @@
         alert("you pressed strg+enter, WOW");
       }
     } else if (downKey === "shift") {
-      el = document.getElementById("activePtnInput");
       if (el != null) {
         type = el.parentNode.className;
         if (k === 37) {
           if (type === "funct") {
-            el.parentElement.parentElement.getElementsByClassName("P-ModDepth").item().click();
+            el.parentElement.parentElement.getElementsByClassName("PMdepth").item().click();
           } else {
             el.parentElement.previousSibling.click();
           }
@@ -414,20 +364,22 @@
             el.getElementsByClassName(type)[0].click();
           } else {
             lastStep = app.getActivePattern().steps - 1;
-            document.querySelector("#row" + lastStep + " ." + type).click();
+            if ((_ref1 = document.querySelector("#row" + lastStep + " ." + type)) != null) {
+              _ref1.click();
+            }
           }
         } else if (k === 40) {
           el = el.parentElement.parentElement.nextSibling;
           if (el != null) {
             el.getElementsByClassName(type)[0].click();
           } else {
-            document.querySelector("#row0 ." + type).click();
+            if ((_ref2 = document.querySelector("#row0 ." + type)) != null) {
+              _ref2.click();
+            }
           }
         } else if (k === 13) {
           el.click(e, false);
         }
-      } else if (k === 13) {
-        document.querySelector("#row0 .funct").click();
       }
     }
     if (k === 16 || k === 17) {
@@ -439,7 +391,6 @@
     var k;
     e.stopPropagation();
     k = e.keyCode;
-    c.l(k);
     if (k === 16) {
       return downKey = "shift";
     } else if (k === 17) {
@@ -454,11 +405,115 @@
 }).call(this);
 
 (function() {
-  var chChPtn, chEl, chInputVal, chMinus, chMinusEl, chPlus, chPlusEl, chSelItem, chStepsPtn, chTStepPtn, copyPtn, copyPtnEl, delPtn, delPtnEl, getName, newPtn, newPtnEl, ptnNameEl, selectEl, setName, stepsEl, stepsMinus, stepsMinusEl, stepsPlus, stepsPlusCopy, stepsPlusCopyEl, stepsPlusEl, tPerStepEl, tStepMinus, tStepMinusEl, tStepPlus, tStepPlusEl;
+  var chChPtn, chEl, chInputVal, chMinus, chMinusEl, chPlus, chPlusEl, chSelItem, chStepsPtn, chTStepPtn, copyPtn, copyPtnEl, delPtn, delPtnEl, getName, getVolume, muteAll, muteEl, muteIt, newPtn, newPtnEl, ptnNameEl, selectEl, setName, setVolume, soloEl, soloIt, stepsEl, stepsMinus, stepsMinusEl, stepsMinusJoin, stepsMinusJoinEl, stepsPlus, stepsPlusCopy, stepsPlusCopyEl, stepsPlusEl, stepsPlusSplit, stepsPlusSplitEl, tPerStepEl, tStepMinus, tStepMinusEl, tStepPlus, tStepPlusEl, volumeEl;
 
   if (typeof app === "undefined" || app === null) {
     window.app = {};
   }
+
+  volumeEl = document.getElementById("volume");
+
+  muteEl = document.getElementById("mute");
+
+  soloEl = document.getElementById("single");
+
+  muteIt = function(checkOnly) {
+    var mute, ptn, ptns, solo, _i, _j, _len, _len1;
+    mute = app.getActivePattern().mute;
+    solo = app.getActivePattern().solo;
+    ptns = app.getActivePatterns();
+    app.newPatterns = true;
+    if (checkOnly !== true) {
+      mute = !mute;
+      if (solo === true) {
+        for (_i = 0, _len = ptns.length; _i < _len; _i++) {
+          ptn = ptns[_i];
+          ptn.mute = false;
+        }
+        app.getActivePattern().solo = false;
+      }
+      for (_j = 0, _len1 = ptns.length; _j < _len1; _j++) {
+        ptn = ptns[_j];
+        ptn.solo = false;
+      }
+      app.getActivePattern().mute = mute;
+    }
+    if (mute) {
+      muteEl.className = "active";
+    } else {
+      muteEl.className = "";
+    }
+    return soloEl.className = "";
+  };
+
+  soloIt = function(checkOnly) {
+    var mute, ptn, ptns, solo, _i, _j, _len, _len1;
+    solo = app.getActivePattern().solo;
+    mute = app.getActivePattern().mute;
+    ptns = app.getActivePatterns();
+    app.newPatterns = true;
+    if (mute) {
+      muteIt;
+    }
+    if (checkOnly !== true) {
+      solo = !solo;
+      for (_i = 0, _len = ptns.length; _i < _len; _i++) {
+        ptn = ptns[_i];
+        ptn.mute = solo;
+      }
+      if (solo === true) {
+        for (_j = 0, _len1 = ptns.length; _j < _len1; _j++) {
+          ptn = ptns[_j];
+          ptn.solo = false;
+        }
+        app.getActivePattern().mute = false;
+      }
+      app.getActivePattern().solo = solo;
+    }
+    if (solo) {
+      soloEl.className = "active";
+      return muteEl.className = "";
+    } else {
+      return soloEl.className = "";
+    }
+  };
+
+  muteAll = function(mute) {
+    var i, ptn, _i, _len, _ref;
+    c.l("muteall");
+    _ref = app.getActivePatterns();
+    for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+      ptn = _ref[i];
+      ptn.mute = true;
+      ptn.solo = false;
+    }
+    app.getActivePattern().mute = false;
+    app.getActivePattern().solo = true;
+    return app.newPatterns = true;
+  };
+
+  setVolume = function() {
+    var val;
+    val = ~~volumeEl.value;
+    if (val < 0) {
+      val = 0;
+    } else if (val > 100) {
+      val = 100;
+    }
+    volumeEl.value = val;
+    app.getActivePattern().volume = val;
+    return app.newPatterns = true;
+  };
+
+  getVolume = function() {
+    return volumeEl.value = app.getActivePattern().volume;
+  };
+
+  muteEl.addEventListener("click", muteIt, false);
+
+  soloEl.addEventListener("click", soloIt, false);
+
+  volumeEl.addEventListener("change", setVolume, false);
 
   newPtnEl = document.getElementById("newPtn");
 
@@ -474,7 +529,8 @@
     });
     ptnMd.data.push(newPtn);
     ptnMd.selPatterns[ptnMd.activeCh] = newPtn.id;
-    return app.refreshPtnOptions();
+    app.refreshPtnOptions();
+    return app.newPatterns = true;
   };
 
   copyPtn = function() {
@@ -494,6 +550,7 @@
     newPtn.id += Date.now();
     ptnMd.data.push(newPtn);
     ptnMd.selPatterns[ptnMd.activeCh] = newPtn.id;
+    app.newPatterns = true;
     return app.refreshPtnOptions();
   };
 
@@ -565,6 +622,10 @@
 
   stepsPlusCopyEl = document.getElementById("stepsPlusCopy");
 
+  stepsPlusSplitEl = document.getElementById("stepsPlusSplit");
+
+  stepsMinusJoinEl = document.getElementById("stepsMinusJoin");
+
   stepsMinusEl = document.getElementById("stepsMinus");
 
   stepsPlus = function() {
@@ -573,7 +634,8 @@
     if (ptn.steps < 128) {
       ptn.steps *= 2;
     }
-    return chStepsPtn(ptn);
+    chStepsPtn(ptn);
+    return app.newPatterns = true;
   };
 
   stepsPlusCopy = function() {
@@ -590,13 +652,46 @@
     return stepsPlus();
   };
 
+  stepsPlusSplit = function() {
+    var i, len, newData, ptn, step, _i, _len, _ref;
+    ptn = app.getActivePattern();
+    newData = [];
+    len = ptn.steps;
+    _ref = ptn.data;
+    for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+      step = _ref[i];
+      if (ptn.data[i] != null) {
+        newData[i * 2] = new app.models.Step(ptn.data[i]);
+      }
+    }
+    ptn.data = newData;
+    return stepsPlus();
+  };
+
+  stepsMinusJoin = function() {
+    var i, len, newData, ptn, step, _i, _len, _ref;
+    ptn = app.getActivePattern();
+    newData = [];
+    len = ptn.steps;
+    _ref = ptn.data;
+    for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+      step = _ref[i];
+      if ((ptn.data[i] != null) && (i / 2) % 1 === 0) {
+        newData[i / 2] = new app.models.Step(ptn.data[i]);
+      }
+    }
+    ptn.data = newData;
+    return stepsMinus();
+  };
+
   stepsMinus = function() {
     var ptn;
     ptn = app.getActivePattern();
-    if (ptn.steps > 2) {
+    if (ptn.steps > 2 && (ptn.steps / 2) % 1 === 0) {
       ptn.steps /= 2;
     }
-    return chStepsPtn(ptn);
+    chStepsPtn(ptn);
+    return app.newPatterns = true;
   };
 
   chStepsPtn = function(ptn) {
@@ -605,15 +700,26 @@
   };
 
   chInputVal = function(e) {
-    var ptn;
+    var ptn, val;
     ptn = app.getActivePattern();
-    ptn.steps = e.target.value;
-    return app.renderPattern(ptn);
+    val = e.target.value;
+    if (val > 0) {
+      ptn.steps = val;
+    } else {
+      e.target.value = 1;
+      ptn.steps = 1;
+    }
+    app.renderPattern(ptn);
+    return app.newPatterns = true;
   };
 
   stepsPlusEl.addEventListener("click", stepsPlus, false);
 
   stepsPlusCopyEl.addEventListener("click", stepsPlusCopy, false);
+
+  stepsPlusSplitEl.addEventListener("click", stepsPlusSplit, false);
+
+  stepsMinusJoinEl.addEventListener("click", stepsMinusJoin, false);
 
   stepsMinusEl.addEventListener("click", stepsMinus, false);
 
@@ -648,6 +754,7 @@
   };
 
   chTStepPtn = function(ptn) {
+    app.newPatterns = true;
     tPerStepEl.innerHTML = "tPerStep: " + ptn.tPerStep;
     return app.renderPattern(ptn);
   };
@@ -672,12 +779,13 @@
   selectEl = document.getElementsByClassName("selectItems")[0];
 
   chSelItem = function(e) {
-    var p, ptn, ptnMd, _i, _len, _ref;
+    var p, ptn, ptnMd, ptnName, _i, _len, _ref;
     ptnMd = app.modes.ptn;
+    ptnName = e.target.value.split(":").pop();
     _ref = ptnMd.data;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       p = _ref[_i];
-      if (p.name === e.target.value) {
+      if (p.name === ptnName) {
         ptn = p;
       }
     }
@@ -688,19 +796,34 @@
   selectEl.addEventListener("click", chSelItem, false);
 
   app.refreshSelect = function() {
-    var item, option, _i, _len, _ref, _results;
+    var i, option, ptn, ptnId, ptns, selPatterns, _i, _j, _len, _len1, _ref, _results;
     selectEl.innerHTML = "";
     option = document.createElement("option");
     option.selected = true;
     option.disabled = true;
     option.innerHTML = "SELECT PATTERN";
     selectEl.appendChild(option);
+    selPatterns = app.modes.ptn.selPatterns;
+    ptns = app.getActivePatterns();
     _ref = app.modes.ptn.data;
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      item = _ref[_i];
+      ptn = _ref[_i];
       option = document.createElement("option");
-      option.innerHTML = item.name;
+      option.innerHTML = "-";
+      for (i = _j = 0, _len1 = selPatterns.length; _j < _len1; i = ++_j) {
+        ptnId = selPatterns[i];
+        if (ptnId === ptn.id) {
+          if (option.innerHTML === "-") {
+            option.innerHTML = i;
+          } else {
+            option.innerHTML += "+" + i;
+          }
+        }
+      }
+      option.innerHTML += ":";
+      option.innerHTML += ptn.mute ? "M" : ptn.solo ? "S" : "_";
+      option.innerHTML += ":" + ptn.name;
       _results.push(selectEl.appendChild(option));
     }
     return _results;
@@ -715,34 +838,149 @@
     chStepsPtn(ptn);
     chTStepPtn(ptn);
     this.refreshSelect();
-    return getName();
+    getName();
+    getVolume();
+    muteIt(true);
+    return soloIt(true);
   };
 
 }).call(this);
 
 (function() {
+  var chMode, chModeEl;
+
+  if (typeof app === "undefined" || app === null) {
+    window.app = {};
+  }
+
+  app.chMode = function(mode) {
+    var ptnOptionEl;
+    document.getElementById("error").innerHTML = "";
+    if (mode != null) {
+      app.activeMode = mode;
+    } else {
+      mode = app.activeMode;
+    }
+    ptnOptionEl = document.getElementById("ptnOptions");
+    if (mode === "ptn") {
+      app.refreshPtnOptions();
+      app.refreshSelect();
+      app.renderPattern(app.getActivePattern());
+      return ptnOptionEl.className = "show";
+    } else if (mode === "funct") {
+      ptnOptionEl.className = "";
+      return app.renderFunct();
+    } else if (mode === "sng") {
+      ptnOptionEl.className = "";
+      return app.renderSong();
+    }
+  };
+
+
+  /* ch mode btn event */
+
+  chModeEl = document.getElementById("chMode");
+
+  chMode = function(e) {
+    var mode;
+    mode = e.target.value.split(" ").pop();
+    if (mode === "PATTERN") {
+      app.chMode("funct");
+      return e.target.value = "MODE: FUNCTION";
+    } else if (mode === "FUNCTION") {
+      app.chMode("ptn");
+      return e.target.value = "MODE: PATTERN";
+    }
+  };
+
+  chModeEl.addEventListener("click", chMode, true);
+
+
+  /* RESET APP */
+
+  document.getElementById("reset").addEventListener("click", function() {
+    if (confirm("Really reset data ??")) {
+      app.initDefaults();
+      return app.chMode();
+    }
+  });
+
+  document.getElementById("play").addEventListener("click", function() {
+    app.stop = false;
+    return app.play();
+  });
+
+  document.getElementById("stop").addEventListener("click", function() {
+    return app.stop();
+  });
+
+  document.getElementById("save2file").addEventListener("click", function() {
+    return app.fs.download("song.json", app.modes);
+  });
+
+  document.getElementById("loadFile").addEventListener("click", function() {
+    return document.getElementById("fileInput").click();
+  });
+
+}).call(this);
+
+(function() {
   window.initPlaySnd = function() {
-    var calcPtn, cv, dev, initDev, lastBuff, swt;
-    lastBuff = null;
-    window.lastBuff = lastBuff;
+    var audioBuff, audioCtx, calcPtn, channels, cv, frameCount, preBuffer, saveWaveToFile, soundgen;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     calcPtn = new Worker("workers/calcPtn.js");
     cv = new app.CanvasVisual("canvasVisual");
-    dev = null;
-    app.recordObj = null;
-    app.cv = cv;
+    frameCount = audioCtx.sampleRate * 16;
+    channels = 2;
+    audioBuff = audioCtx.createBuffer(2, frameCount, audioCtx.sampleRate);
+    preBuffer = [];
+    soundgen = (function() {
+      var bufferSize, node, output;
+      bufferSize = 4096;
+      node = audioCtx.createScriptProcessor(bufferSize, 0, 2);
+      output = [];
+      node.onaudioprocess = function(e) {
+        var b, i, len, newBuff;
+        app.play();
+        output[0] = e.outputBuffer.getChannelData(0);
+        output[1] = e.outputBuffer.getChannelData(1);
+        newBuff = preBuffer.shift() || null;
+        cv.drawArea(newBuff);
+        if (newBuff === null) {
+          return c.l("no Buffer");
+        }
+        len = newBuff.length;
+        i = 0;
+        b = 0;
+        while (len > i) {
+          output[0][b] = newBuff[i];
+          output[1][b] = newBuff[i];
+          i += 2;
+          b++;
+        }
+      };
+      return node;
+    })();
     calcPtn.onmessage = function(e) {
-      if (dev == null) {
-        return initDev();
-      }
-      dev.writeBufferSync(e.data);
-      return lastBuff = e.data;
+      preBuffer.push(e.data);
+      return soundgen.connect(audioCtx.destination);
     };
     app.play = function() {
       var jsonFuncts, jsonPtn, rst;
-      jsonPtn = JSON.stringify(app.getActivePatterns());
-      jsonFuncts = JSON.stringify(app.modes.funct.data[0].data);
-      if (app.rstSteps === true) {
-        rst = true;
+      if (app.newPatterns === true) {
+        jsonPtn = JSON.stringify(app.getActivePatterns());
+        app.newPatterns = false;
+      } else {
+        jsonPtn = null;
+      }
+      if (app.newFuncts === true) {
+        jsonFuncts = JSON.stringify(app.modes.funct.data[0].data);
+        app.newFuncts = false;
+      } else {
+        jsonFuncts = null;
+      }
+      if (app.rstSteps) {
+        rst = app.rstSteps;
         app.rstSteps = false;
       } else {
         rst = false;
@@ -754,41 +992,25 @@
       });
     };
     app.rec = function() {
-      var newWindow, wav;
-      return c.l("have to implement better way ...");
-      if (dev == null) {
-        return initDev();
-      }
-      if (app.recordObj === null) {
-        return app.recordObj = dev.record();
-      } else {
-        app.recordObj.stop();
-        wav = 'data:application/octet-stream,' + btoa(app.recordObj.toWav());
-        return newWindow = window.open(wav, "*.wav");
-      }
+      return null;
     };
-    dev = void 0;
-    swt = false;
-    initDev = function() {
-      var channelCount, preBufferSize, sampleRate, tPerStep;
-      channelCount = 2;
-      preBufferSize = 1024;
-      sampleRate = 44100;
-      app.play();
-      tPerStep = app.getActivePattern().tPerStep / 32;
-      dev = audioLib.Sink(null, channelCount, preBufferSize, sampleRate);
-      app.dev = dev;
-      return dev.on("audioprocess", function(e) {
-        if (this.getSyncWriteOffset() < (preBufferSize * 4) && swt) {
-          app.cv.drawArea(lastBuff);
-          app.play();
-          return swt = false;
-        } else if (swt !== true) {
-          return swt = true;
+    return saveWaveToFile = function(filename, link) {
+      var r;
+      r = new XMLHttpRequest();
+      r.open("GET", link, true);
+      r.onreadystatechange = function() {
+        var el;
+        if (r.readyState !== 4 || r.status !== 200) {
+          return;
         }
-      });
+        el = document.createElement("a");
+        el.setAttribut("href", "data:audio/wav;charset=utf-8," + r.responseText);
+        c.l(r);
+        el.setAttribute("download", filename);
+        return el.click();
+      };
+      return r.send();
     };
-    return app.dev = dev;
   };
 
 }).call(this);
@@ -802,8 +1024,8 @@
     function CanvasVisual(el) {
       this.canvas = document.getElementById(el);
       this.context = this.canvas.getContext("2d");
-      this.width = this.canvas.width = 512;
-      this.height = this.canvas.height = 512;
+      this.width = this.canvas.width = (8192 * 4) / 64;
+      this.height = this.canvas.height = 16;
       this.canvas.width = this.width;
       this.zoom = 0.9;
       this.speed = 1;
@@ -859,7 +1081,7 @@
 }).call(this);
 
 (function() {
-  var elToSet, functKeyToSet, functToSet, playFunct, playFunctWorker, saveFunct, testFormula, tester;
+  var addFunct, dataEl, elToSet, functKeyToSet, functToSet, genInputFunctField, playFunct, playFunctWorker, removeFunct, renameProperty, saveFunct, saveKey, testFormula, tester;
 
   if (typeof app === "undefined" || app === null) {
     window.app = {};
@@ -869,11 +1091,25 @@
 
   playFunctWorker = new Worker("workers/playFormula.js");
 
+  dataEl = document.getElementById("data");
+
+  renameProperty = function(obj, oldName, newName) {
+    if (obj.hasOwnProperty(oldName)) {
+      obj[newName] = obj[oldName];
+      delete obj[oldName];
+    }
+    return obj;
+  };
+
   functKeyToSet = "";
 
   elToSet = "";
 
   functToSet = "";
+
+  playFunctWorker.onmessage = function(e) {
+    return app.dev.writeBufferSync(e.data);
+  };
 
   playFunct = function(e) {
     var formula, key;
@@ -882,40 +1118,98 @@
     return playFunctWorker.postMessage(formula);
   };
 
-  playFunctWorker.onmessage = function(e) {
-    return app.dev.writeBufferSync(e.data);
+  removeFunct = function(e) {
+    var funct, functName, functs, key;
+    functName = e.target.nextSibling.value;
+    functs = app.modes.funct.data[0].data;
+    for (key in functs) {
+      funct = functs[key];
+      if (functName === key) {
+        delete app.modes.funct.data[0].data[key];
+        return app.renderFunct();
+      }
+    }
   };
 
   saveFunct = function(e) {
-    c.l(e);
+    if (e.keyCode != null) {
+      if (e.keyCode !== 13) {
+        return;
+      }
+    }
     functKeyToSet = e.target.previousSibling.value;
     elToSet = e.target;
     functToSet = e.target.value;
     return testFormula(functToSet);
   };
 
-  app.renderFunct = function() {
-    var cnt, dataEl, fragment, funct, input, key, spanKey, val, wrap, _ref;
-    dataEl = document.getElementById("data");
-    fragment = document.createDocumentFragment();
-    wrap = fragment.appendChild(document.createElement("div"));
+  saveKey = function(e) {
+    if (e.keyCode != null) {
+      if (e.keyCode !== 13) {
+        return;
+      }
+    }
+    functKeyToSet = e.target.value;
+    renameProperty(app.modes.funct.data[0].data, e.target.alt, e.target.value);
+    return functToSet = e.target.value;
+  };
+
+  addFunct = function() {
+    var funct, functName, functs, key;
+    functName = "new";
+    functs = app.modes.funct.data[0].data;
+    for (key in functs) {
+      funct = functs[key];
+      if (functName === key) {
+        functName += "X";
+      }
+      console.log(key);
+    }
+    app.modes.funct.data[0].data[functName] = "t*t";
+    return app.renderFunct();
+  };
+
+  genInputFunctField = function(title, funct) {
+    var input, remove, spanKey, wrap;
+    wrap = document.createElement("div");
     wrap.className = "functWrap";
-    funct = app.modes.funct.data[0];
+    remove = wrap.appendChild(document.createElement("input"));
+    spanKey = wrap.appendChild(document.createElement("input"));
+    input = wrap.appendChild(document.createElement("input"));
+    input.value = funct;
+    remove.type = "button";
+    remove.className = "remove";
+    remove.value = "x";
+    spanKey.value = title;
+    spanKey.type = "text";
+    spanKey.className = "btn";
+    spanKey.alt = title;
+    spanKey.addEventListener("change", saveKey, false);
+    input.addEventListener("change", saveFunct, false);
+    spanKey.addEventListener("keypress", saveKey, false);
+    input.addEventListener("keypress", saveFunct, false);
+    remove.addEventListener("click", removeFunct, false);
+    return wrap;
+  };
+
+  app.renderFunct = function() {
+    var addNewWrapEl, cnt, fragment, funct, input, key, val, _ref;
     dataEl.innerHTML = "";
+    fragment = document.createDocumentFragment();
+    funct = app.modes.funct.data[0];
     cnt = 0;
     _ref = funct.data;
     for (key in _ref) {
       val = _ref[key];
-      spanKey = wrap.appendChild(document.createElement("input"));
-      input = wrap.appendChild(document.createElement("input"));
-      input.value = val;
-      spanKey.value = key;
-      spanKey.type = "button";
-      spanKey.className = "btn";
-      spanKey.addEventListener("click", playFunct, false);
-      input.addEventListener("blur", saveFunct, false);
+      fragment.appendChild(genInputFunctField(key, val));
       cnt++;
     }
+    addNewWrapEl = fragment.appendChild(document.createElement("div"));
+    input = addNewWrapEl.appendChild(document.createElement("input"));
+    input.type = "button";
+    input.value = "ADD NEW";
+    input.className = "btn btn-new";
+    input.addEventListener("click", addFunct, false);
     return dataEl.appendChild(fragment);
   };
 
@@ -929,7 +1223,8 @@
     if (e.data === false) {
       app.modes.funct.data[0].data[functKeyToSet] = functToSet;
       elToSet.innerHTML = functToSet;
-      return errorEl.innerHTML = "";
+      errorEl.innerHTML = "";
+      return app.newFuncts = true;
     } else {
       val = app.modes.funct.data[0].data[functKeyToSet];
       elToSet.value = val;
@@ -940,7 +1235,7 @@
 }).call(this);
 
 (function() {
-  var Step, elToSet, escToStr, functToSet, parseInput, stepToSet, testFormula, tester, toggleInputEl;
+  var Step, elToSet, escToStr, functToSet, parseInput, removeInput, stepToSet, testFormula, tester, toggleInputEl;
 
   if (typeof app === "undefined" || app === null) {
     window.app = {};
@@ -950,7 +1245,7 @@
 
   app.renderPattern = function(ptn) {
     var COLS, ROWS, cols, div1, fragment, headers, posCode, rows, table, tableBody, tableHead, target, td, th, tr, txt, type;
-    headers = ["Tpos", "pos", "hlp", "rstT", "funct", "oct", "note", "vel", "aModSpeed", "aModDepth", "pModSpeed", "pModDepth"];
+    headers = ["Tpos", "pos", "hlp", "rstT", "funct", "oct", "note", "vel"];
     COLS = headers.length;
     ROWS = ptn.steps;
     rows = ROWS;
@@ -982,22 +1277,22 @@
           posCode = (rows + 1) % div1;
           txt = "";
           if ((rows + 1) % div1 === 0) {
-            txt = "++++";
+            txt = "####";
           } else if ((rows + 1) % (div1 / 2) === 0) {
-            txt = "+++";
+            txt = "###";
           } else if ((rows + 1) % (div1 / 4) === 0) {
             txt = "++";
           } else if ((rows + 1) % (div1 / 8) === 0) {
-            txt = "+";
+            txt = "--";
           } else if ((rows + 1) % (div1 / 16) === 0) {
             txt = "-";
           }
           td.innerHTML = txt;
         } else if (type === "rstT") {
           if ((ptn.data[ROWS - rows - 1] != null) && ptn.data[ROWS - rows - 1][type] === true) {
-            td.innerHTML = "yes";
+            td.innerHTML = "X";
           } else {
-            td.innerHTML = "no";
+            td.innerHTML = " ";
           }
         } else {
           if (ptn.data[ROWS - rows - 1] != null) {
@@ -1039,6 +1334,8 @@
 
   functToSet = "0";
 
+  removeInput = false;
+
   tester = new Worker("workers/testFormula.js");
 
   testFormula = function(formula) {
@@ -1048,7 +1345,6 @@
       val = functs[key];
       formula = formula.replace(new RegExp(key, 'gi'), "(" + val + ")");
     }
-    c.l(formula);
     return tester.postMessage(formula);
   };
 
@@ -1057,26 +1353,33 @@
     errorEl = document.getElementById("error");
     if (e.data === false) {
       app.getActivePattern().data[stepToSet].funct = functToSet;
-      elToSet.parentNode.innerHTML = functToSet;
-      return errorEl.innerHTML = "";
+      if (removeInput === false) {
+        elToSet.parentNode.innerHTML = functToSet;
+      }
+      errorEl.innerHTML = "";
+      app.newPatterns = true;
+      return c.l("formula is cool!");
     } else {
       val = app.getActivePattern().data[stepToSet].funct;
-      elToSet.parentNode.innerHTML = val;
+      if (removeInput === false) {
+        elToSet.parentNode.innerHTML = val;
+      }
       return errorEl.innerHTML = "funct: '" + functToSet + "' at pos: " + stepToSet + "\nERROR: " + e.data;
     }
   };
 
   toggleInputEl = function(e, close) {
-    var el, input, ptn, step, type, typeE, val;
+    var el, input, ptn, step, tagName, type, typeE, val;
+    tagName = e.target.tagName;
+    if (tagName !== "TD" && tagName !== "INPUT") {
+      return c.l("some went wrong", e);
+    }
     el = document.getElementById("activePtnInput");
     typeE = e.target.className;
-    if (type === "pos" || type === "Tpos") {
+    if (typeE === "pos" || typeE === "Tpos" || typeE === "hlp") {
       return false;
     }
     if (el !== null) {
-      if ((el != null) && el.parentNode === e.target.parentNode) {
-        return c.l("same");
-      }
       val = el.value;
       step = el.parentNode.parentNode.id.split("row")[1];
       type = el.parentNode.className;
@@ -1093,9 +1396,18 @@
         stepToSet = step;
         elToSet = el;
         functToSet = val;
+        if (el.parentNode !== e.target.parentNode) {
+          removeInput = false;
+        } else {
+          removeInput = true;
+        }
         testFormula(val);
       } else {
         ptn.data[step][type] = val;
+        app.newPatterns = true;
+        if ((el != null) && el.parentNode === e.target.parentNode) {
+          return false;
+        }
         el.parentNode.innerHTML = val;
       }
     }
@@ -1106,7 +1418,8 @@
         ptn.data[step] = new Step();
       }
       val = !ptn.data[step].rstT;
-      e.target.innerHTML = val === true ? "yes" : "no";
+      e.target.innerHTML = val === true ? "X" : " ";
+      app.newPatterns = true;
       return ptn.data[step].rstT = val;
     }
     val = escToStr(e.target.innerHTML);
@@ -1116,108 +1429,6 @@
     input.value = val;
     e.target.innerHTML = "";
     return e.target.appendChild(input).select();
-  };
-
-}).call(this);
-
-(function() {
-  var saveFunct;
-
-  if (typeof app === "undefined" || app === null) {
-    window.app = {};
-  }
-
-  saveFunct = function(e) {
-    return checkFormula(e.target.value);
-  };
-
-  app.renderSong = function() {
-    var chWrap, channels, cnt, dataEl, dragRow, fragment, i, id, ptn, ptnEl, ptns, rowEl, sng, spanEl, wrap, _i, _j, _len, _len1, _ref;
-    dataEl = document.getElementById("data");
-    dataEl.innerHTML = "";
-    fragment = document.createDocumentFragment();
-    wrap = fragment.appendChild(document.createElement("div"));
-    wrap.className = "sngWrap";
-    rowEl = wrap.appendChild(document.createElement("ul"));
-    rowEl.className = "draggarea";
-    ptns = app.modes.ptn.data;
-    for (i = _i = 0, _len = ptns.length; _i < _len; i = ++_i) {
-      ptn = ptns[i];
-      ptnEl = rowEl.appendChild(document.createElement("li"));
-      ptnEl.className = "draggable";
-      ptnEl.uid = ptn.id;
-      ptnEl.style.width = ((ptn.steps * ptn.tPerStep / 400) - 6) + "px";
-      ptnEl.innerHTML = ptn.name;
-    }
-    wrap.appendChild(document.createElement("hr"));
-    chWrap = wrap.appendChild(document.createElement("div"));
-    chWrap.className = "chWrap";
-    channels = 6;
-    cnt = 0;
-    sng = app.modes.sng.data[0].data;
-    while (cnt < channels) {
-      dragRow = chWrap.appendChild(document.createElement("ul"));
-      dragRow.className = "dropable";
-      dragRow.id = "sngChannel" + cnt;
-      spanEl = dragRow.appendChild(document.createElement("span"));
-      spanEl.innerHTML = cnt + ":";
-      _ref = sng[cnt];
-      for (i = _j = 0, _len1 = _ref.length; _j < _len1; i = ++_j) {
-        id = _ref[i];
-        ptn = app.getPatternById(id);
-        ptnEl = dragRow.appendChild(document.createElement("li"));
-        ptnEl.style.width = ((ptn.steps * ptn.tPerStep / 400) - 6) + "px";
-        ptnEl.innerHTML = ptn.name;
-        ptnEl.uid = id;
-        ptnEl.className = "draggable";
-      }
-      cnt++;
-    }
-    dataEl.appendChild(fragment);
-    $(".draggarea li").draggable({
-      appendTo: "body",
-      helper: "clone"
-    });
-    $(".dropable").droppable({
-      activeClass: "ui-state-default",
-      hoverClass: "ui-state-hover",
-      accept: ":not(.ui-sortable-helper)",
-      drop: function(event, ui) {
-        var clone;
-        $(this).find(".placeholder").remove();
-        clone = ui.helper.context.cloneNode(true);
-        clone.uid = ui.helper.context.uid;
-        clone.onmousedown = function(e) {
-          if (e.button === 2) {
-            return $(e.target).remove();
-          }
-        };
-        return $(this).append(clone);
-      }
-    }).sortable({
-      items: "li:not(.placeholder)",
-      stop: function(e, ui) {
-        var channel, el, j, sngData, _k, _len2, _ref1, _results;
-        channel = e.target.id.split("sngChannel")[1];
-        sngData = app.modes.sng.data[0].data;
-        _ref1 = e.target.children;
-        _results = [];
-        for (j = _k = 0, _len2 = _ref1.length; _k < _len2; j = ++_k) {
-          el = _ref1[j];
-          if (j !== 0) {
-            _results.push(sngData[channel][j - 1] = el.uid);
-          } else {
-            _results.push(void 0);
-          }
-        }
-        return _results;
-      }
-    });
-    return $(".dropable li").on("mousedown", function(e) {
-      if (e.button === 2) {
-        return $(e.target).remove();
-      }
-    });
   };
 
 }).call(this);

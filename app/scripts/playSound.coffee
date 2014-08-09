@@ -7,16 +7,15 @@ window.initPlaySnd= ->
   channels = 2
   audioBuff = audioCtx.createBuffer(2, frameCount, audioCtx.sampleRate)
 
-
-
   preBuffer = []
-
+  
   soundgen = (->
-    bufferSize = 4096*2
+    bufferSize = 4096
     node = audioCtx.createScriptProcessor(bufferSize, 0, 2)
     output = []
     node.onaudioprocess = (e) ->
       app.play()
+      #c.l "buffer is stock >> ", preBuffer.length
       output[0] = e.outputBuffer.getChannelData(0)
       output[1] = e.outputBuffer.getChannelData(1)
       newBuff = preBuffer.shift() || null
@@ -24,7 +23,13 @@ window.initPlaySnd= ->
       if newBuff is null then return c.l "no Buffer"
 
       len = newBuff.length
-      while len-- then index = len%2; output[index][len] = newBuff[len]
+      i = 0
+      b = 0
+      while len>i
+        output[0][b] = newBuff[i]
+        output[1][b] = newBuff[i]
+        i+=2
+        b++
       return
     node
   )()
@@ -32,13 +37,24 @@ window.initPlaySnd= ->
 
   calcPtn.onmessage = (e)->
     preBuffer.push(e.data)
-    if preBuffer.length>0 then soundgen.connect audioCtx.destination
+    soundgen.connect audioCtx.destination
+
   app.play = ()->
-    ## TODO check if ActivePAttersn and functs have change else dont send
-    jsonPtn = JSON.stringify app.getActivePatterns()
-    jsonFuncts = JSON.stringify app.modes.funct.data[0].data
-    if app.rstSteps is true then rst = true; app.rstSteps = false
+    if app.newPatterns is true
+      jsonPtn = JSON.stringify app.getActivePatterns()
+      app.newPatterns = false
+    else jsonPtn = null
+
+    if app.newFuncts is true
+      jsonFuncts = JSON.stringify app.modes.funct.data[0].data
+      app.newFuncts = false
+    else jsonFuncts = null
+
+    if app.rstSteps
+      rst = app.rstSteps
+      app.rstSteps = false
     else rst = false
+
     calcPtn.postMessage( ptns: jsonPtn, rst: rst, functs: jsonFuncts )
 
   ################################################

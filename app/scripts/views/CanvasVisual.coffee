@@ -4,8 +4,8 @@ class app.CanvasVisual
   constructor: (el)->
     @canvas = document.getElementById(el)
     @context = @canvas.getContext("2d")
-    @width = @canvas.width = 512
-    @height = @canvas.height = 512
+    @width = @canvas.width = (8192*4)/64
+    @height = @canvas.height = 16
     @canvas.width = @width
     @zoom = 0.9
     @speed = 1

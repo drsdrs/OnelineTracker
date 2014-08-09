@@ -1,7 +1,6 @@
 ##############################
 ##### KEYBOARD CONTROLLS #####
 ##############################
-
 downKey = ""
 keyUp = (e)->
   e.stopPropagation()
@@ -16,7 +15,7 @@ keyUp = (e)->
   else if k is 102 then tStepPlus() # 6
   else if k is 13# enter key # should select first funct row
     if el? then el.click()
-    else document.querySelector("#row0 .funct").click()
+    else document.querySelector("#row0 .funct")?.click()
 
   if downKey is "ctrl"
     if k is 37 then app.chMode "sng" # left
@@ -44,11 +43,12 @@ keyUp = (e)->
         if el? then el.getElementsByClassName(type)[0].click()
         else
           lastStep = app.getActivePattern().steps-1
-          document.querySelector("#row"+lastStep+" ."+type).click()
+          document.querySelector("#row"+lastStep+" ."+type)?.click()
       else if k is 40 # down
         el = el.parentElement.parentElement.nextSibling
         if el? then el.getElementsByClassName(type)[0].click()
-        else document.querySelector("#row0 ."+type).click()
+        else
+          document.querySelector("#row0 ."+type)?.click()
       else if k is 13 # enter key # should submit value
         el.click(e, false)
 

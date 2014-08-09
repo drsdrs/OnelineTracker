@@ -23,18 +23,29 @@ class Step
 t = 0
 ts = [0,0,0,0,0,0]
 tp = [0,0,0,0,0,0]
-step = [0,0,0,0,0,0]
+step = [-1,-1,-1,-1,-1,-1]
 oct = [0,0,0,0,0,0]
 note = [0,0,0,0,0,0]
 vel = [100,100,100,100,100,100]
 funct = ["1023","1023","1023","1023","1023","1023"]
-minlength = 4096*4
+minlength = 4096*2
 arr = []
 functs = {}
+ptns = {}
 audioBuff = []
 
+corrSteps = (ptns, ch) ->
+  i = ptns.length
+  while i--
+    modulo = ptns[i].steps
+    srcNr = (step[i]+1)%modulo
+    j = ptns.length
+    while j--
+      trgNr = (step[j]+1)%modulo
+      if trgNr>srcNr then step[j] += (trgNr-srcNr)&modulo else if trgNr<srcNr then step[j] += (srcNr-trgNr)%modulo
+
 setDefaults = ->
-  #step = [0,0,0,0,0,0]
+  step = [0,0,0,0,0,0]
   #oct = [0,0,0,0,0,0]
   #note = [0,0,0,0,0,0]
   #vel = [100,100,100,100,100,100]
@@ -46,8 +57,9 @@ replaceShortcuts = (formula)->
     formula = formula.replace new RegExp(key, 'gi'), "("+val+")"
   formula
 
-setAndFill = (ptn, ch, offset)->
+setAndFill = (ptn, ch, offset, mute)->
   data = ptn.data[step[ch]]
+  #if mute is false then mute = 1 else mute = 0
   if offset?
     if !data? then data = new Step
     if data.oct isnt "=" then oct[ch] = data.oct
@@ -64,8 +76,8 @@ setAndFill = (ptn, ch, offset)->
   #c.l ch
   while len--
     smpl = (smplFunct(ts[ch]*nm))
-    smpl = (smpl&2047)-1023
-    smpl = smpl/170.5
+    smpl = if mute is false then ((smpl&2047))-1023 else 0
+    smpl = smpl/170.5 ## wrong typeArrayType hack
     smpl = smpl/10000*vel[ch]*ptn.volume
     if isNaN smpl then c.l "nan!"
     arr[ch][t] = smpl
@@ -73,28 +85,30 @@ setAndFill = (ptn, ch, offset)->
     ++ts[ch]
     ++tp[ch]
     if tp[ch]>=tPerStep and len>1
-      tp[ch]=0
+      tp[ch]= 0
       ## maybe check step array and reset if 10x false ?!
       step[ch] = (++step[ch])%ptn.steps
-      setAndFill ptn, ch, len
+      #if step[ch] is 0 and ch is 0 then console.log ch+"/"+step
+      setAndFill ptn, ch, len, mute
       len = 1
 
 ########################
 ### Start Processing ###
 ########################
 self.addEventListener "message", ((e) ->
-  ptns = JSON.parse e.data.ptns
-  functs = JSON.parse e.data.functs
-
-  if e.data.rst is true then setDefaults()
+  ptnsNew = JSON.parse e.data.ptns
+  functsNew = JSON.parse e.data.functs
+  if ptnsNew isnt null then ptns = ptnsNew
+  if functsNew isnt null then functs = functsNew
+  if e.data.rst then step = [0,0,0,0,0,0]; tp = [0,0,0,0,0,0]; ts = [0,0,0,0,0,0]; console.log "RST"
   # TODO find way to save reset Steps
 
-  channels = 6
+  channels = ptns.length
   while channels--
     arr[channels] = new Float32Array(minlength)
     t = 0
     #step = 0
-    if ptns[channels].mute is false then setAndFill(ptns[channels], channels)
+    setAndFill(ptns[channels], channels, null, ptns[channels].mute)
 
   #merge arrays
   newArr = new Float32Array(minlength)

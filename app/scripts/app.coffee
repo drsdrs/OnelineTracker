@@ -1,6 +1,4 @@
 if !app? then window.app = {}
-app.getMaxOfArray = (arr)-> Math.max.apply(null, arr)
-app.getMinOfArray = (arr)-> Math.min.apply(null, arr)
 
 app.initDefaults = ->
   Pattern = app.models.Pattern
@@ -28,9 +26,25 @@ app.initDefaults = ->
 window.initApp = ->
   app.name= "onelineTracker"
   app.activeMode= "ptn"
+  app.newPatterns= true
+  app.newFuncts = true
 
   modesLoadet = app.ls.load()
   if modesLoadet? && modesLoadet isnt false then app.modes = modesLoadet
   else app.initDefaults()
 
   window.onbeforeunload = -> app.ls.save(app.modes)
+
+
+  ######   TESTAREA  ######
+
+  app.corrSteps = (ptns) ->
+    i = ptns.length
+    while i--
+      modulo = ptns[i].steps
+      srcNr = (step[i]+1)%modulo
+      j = ptns.length
+      while j--
+        trgNr = (step[j]+1)%modulo
+        if trgNr>srcNr then step[j] += (trgNr-srcNr)&modulo else if trgNr<srcNr then step[j] += (srcNr-trgNr)%modulo
+    console.log step

@@ -1,11 +1,5 @@
 getMaxOfArray = (arr)-> Math.max.apply(null, arr)
 getMinOfArray = (arr)-> Math.min.apply(null, arr)
-
-memcpy= (dst, dstOffset, src, srcOffset, length) ->
-  dstU8 = new Uint8ClampedArray(dst, dstOffset, length)
-  srcU8 = new Uint8ClampedArray(src, srcOffset, length)
-  dstU8.set(srcU8)
-
 c= console; c.l = c.log
 
 arrs = []
@@ -20,11 +14,7 @@ self.addEventListener "message", ((e) ->
   width = imgd.width
   height = soundData.length/width
 
-  sub = imgd.data.subarray(0, imgd.data.length-(soundData.length*4))
-
-  #sub = new Uint8ClampedArray(pix.subarray(0, soundData.length*4))
-
-  old =  sub[12]
+  #sub = imgd.data.subarray(0, imgd.data.length-(soundData.length*4))
 
   #analyse arra for min max, correct it to fit 0-255
   max = 0.2502443790435791#getMaxOfArray soundData
@@ -46,7 +36,7 @@ self.addEventListener "message", ((e) ->
     pix[pos+3] = smpl
     at++
 
-  imgd.data.set(sub, soundData.length*4)
+  #imgd.data.set(sub, soundData.length*4)
   imgd.data.set(pix, 0)
   self.postMessage imgd
 ), false

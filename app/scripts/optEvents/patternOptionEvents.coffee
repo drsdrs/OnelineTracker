@@ -9,6 +9,7 @@ muteIt = (checkOnly)->
   mute = app.getActivePattern().mute
   solo = app.getActivePattern().solo
   ptns = app.getActivePatterns()
+  app.newPatterns = true
   if checkOnly isnt true
     mute = !mute
     if solo is true
@@ -23,6 +24,7 @@ soloIt = (checkOnly)->
   solo = app.getActivePattern().solo
   mute = app.getActivePattern().mute
   ptns = app.getActivePatterns()
+  app.newPatterns = true
   if mute then muteIt
   if checkOnly isnt true
     solo = !solo
@@ -44,14 +46,15 @@ muteAll = (mute)->
     ptn.solo = false
   app.getActivePattern().mute = false
   app.getActivePattern().solo = true
-
-
+  app.newPatterns = true
 
 setVolume = ()->
   val = ~~(volumeEl.value)
   if val<0 then val = 0 else if val>100 then val = 100
   volumeEl.value = val
   app.getActivePattern().volume = val
+  app.newPatterns = true
+
 getVolume = ()-> volumeEl.value = app.getActivePattern().volume
 
 muteEl.addEventListener "click", muteIt, false
@@ -69,6 +72,8 @@ newPtn = ->
   ptnMd.data.push newPtn
   ptnMd.selPatterns[ptnMd.activeCh] = newPtn.id
   app.refreshPtnOptions()
+  app.newPatterns = true
+
 
 copyPtn = ->
   ptnMd = app.modes.ptn
@@ -82,6 +87,8 @@ copyPtn = ->
   newPtn.id += Date.now()
   ptnMd.data.push newPtn
   ptnMd.selPatterns[ptnMd.activeCh] = newPtn.id
+  app.newPatterns = true
+
 
 
   app.refreshPtnOptions()
@@ -139,6 +146,7 @@ stepsPlus = ->
   ptn = app.getActivePattern()
   if ptn.steps<128 then ptn.steps *= 2
   chStepsPtn(ptn)
+  app.newPatterns = true
 stepsPlusCopy = ->
   ptn = app.getActivePattern()
   len = ptn.steps
@@ -167,6 +175,7 @@ stepsMinus = ->
   ptn = app.getActivePattern()
   if ptn.steps>2 and (ptn.steps / 2)%1 is 0 then ptn.steps /= 2
   chStepsPtn(ptn)
+  app.newPatterns = true
 chStepsPtn = (ptn)->
   stepsEl.value = ptn.steps
   app.renderPattern(ptn)
@@ -177,6 +186,8 @@ chInputVal = (e)->
   if val>0 then ptn.steps = val
   else e.target.value = 1; ptn.steps = 1
   app.renderPattern(ptn)
+  app.newPatterns = true
+
 
 stepsPlusEl.addEventListener "click", stepsPlus, false
 stepsPlusCopyEl.addEventListener "click", stepsPlusCopy, false
@@ -203,6 +214,7 @@ tStepMinus = ->
   chTStepPtn(ptn)
   app.rstSteps = true
 chTStepPtn = (ptn)->
+  app.newPatterns = true
   tPerStepEl.innerHTML = "tPerStep: "+ptn.tPerStep
   app.renderPattern(ptn)
 

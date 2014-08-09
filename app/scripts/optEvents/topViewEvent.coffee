@@ -25,18 +25,11 @@ chMode = (e)->
     app.chMode "funct"
     e.target.value = "MODE: FUNCTION"
   else if mode is "FUNCTION"
-    app.chMode "sng"
-    e.target.value = "MODE: SONG"
-  else if mode is "SONG"
     app.chMode "ptn"
     e.target.value = "MODE: PATTERN"
 
 chModeEl.addEventListener "click", chMode, true
 
-### EN/DISABLE DOCS ###
-docsEl = document.getElementById("docs")
-document.getElementById("toggleDocs").addEventListener "click", ->
-  docsEl.className = if docsEl.className is "show" then "" else "show"
 
 ### RESET APP ###
 document.getElementById("reset").addEventListener "click", ->
@@ -47,8 +40,7 @@ document.getElementById("reset").addEventListener "click", ->
 document.getElementById("play").addEventListener "click", ->
   app.stop = false
   app.play()
-document.getElementById("stop").addEventListener "click", -> app.stop = true
-document.getElementById("rec").addEventListener "click", -> app.rec()
+document.getElementById("stop").addEventListener "click", -> app.stop()
 
 
 document.getElementById("save2file").addEventListener "click", ->

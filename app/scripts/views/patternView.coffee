@@ -6,8 +6,8 @@ Step = app.models.Step
 app.renderPattern = (ptn)->
   headers = [
     "Tpos", "pos", "hlp", "rstT", "funct", "oct"
-    "note", "vel", "AMspeed", "AMdepth"
-    , "PMspeed", "PMdepth"
+    "note", "vel"
+    #"AMspeed", "AMdepth", "PMspeed", "PMdepth"
   ]
 
   COLS  = headers.length
@@ -53,9 +53,9 @@ app.renderPattern = (ptn)->
         td.innerHTML = txt
       else if type=="rstT"
         if ptn.data[ROWS-rows-1]? && ptn.data[ROWS-rows-1][type]==true
-          td.innerHTML= "yes"
+          td.innerHTML= "X"
         else
-          td.innerHTML= "no"
+          td.innerHTML= " "
       else
         if ptn.data[ROWS-rows-1]?
           td.innerHTML = ptn.data[ROWS-rows-1][type]
@@ -67,9 +67,7 @@ app.renderPattern = (ptn)->
   target.appendChild fragment
 
 ############################
-escToStr = (str)->
-  str.replace(/&amp;/g, "&").replace(/&gt;/g, ">")
-    .replace(/&lt;/g, "<")#.replace(/"/g, "&quot;")
+escToStr = (str)-> str.replace(/&amp;/g, "&").replace(/&gt;/g, ">").replace(/&lt;/g, "<")
 
 parseInput = (val, max)->
   if val is "=" then return val
@@ -97,6 +95,8 @@ tester.onmessage = (e)->
     app.getActivePattern().data[stepToSet].funct = functToSet
     if removeInput is false then elToSet.parentNode.innerHTML = functToSet
     errorEl.innerHTML= ""
+    app.newPatterns = true
+    c.l "formula is cool!"
   else
     val = app.getActivePattern().data[stepToSet].funct
     if removeInput is false then elToSet.parentNode.innerHTML = val
@@ -132,16 +132,19 @@ toggleInputEl = (e, close)->
       testFormula(val)
     else
       ptn.data[step][type] = val
+      app.newPatterns = true
       if el? and el.parentNode is e.target.parentNode
-        return c.l "same"
+        return false # only save...
       el.parentNode.innerHTML = val
+
 
   if typeE is "rstT"
     step = e.target.parentNode.id.split("row")[1]
     ptn = app.getActivePattern()
     if !ptn.data[step]? then ptn.data[step] = new Step()
     val = !ptn.data[step].rstT
-    e.target.innerHTML = if val is true then "yes" else "no"
+    e.target.innerHTML = if val is true then "X" else " "
+    app.newPatterns = true
     return ptn.data[step].rstT = val
 
   # create and set input

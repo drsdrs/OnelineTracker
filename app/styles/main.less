@@ -59,10 +59,34 @@ input[type=button] {
 #header {
   text-align: center;
   width:100%;
-  input, select, option { border-bottom: 0 solid @fg; }
-  #selectItems { float: left; }
-  #new { float: right; }
+  //#selectItems { float: left; }
+  //#new { float: right; }
 
+  ul {
+    left: 0;
+    font-size: 13px;
+    position: absolute;
+    display: inline-block;
+    list-style-type: none;
+    margin: 8px 0 0 0;
+    padding: 2px;
+    list-style: none;
+    border: 2px solid @fg;
+    width: 104px;
+    z-index: 999;
+    color: @fg;
+    background: @bg;
+
+  }
+  ul:hover>li {
+    display: block;
+    color: @bg;
+  }
+  li {
+    &:hover { display: block; }
+    display: none;
+    input {border: 0;}
+  }
 }
 
 /*##############
@@ -70,10 +94,10 @@ input[type=button] {
 ##############*/
 
 #options {
+  margin: 12px 0;
+  border-top: 2px solid @fg;
   #steps, #volume { width: 86px; font-size: 16px;}
   &>div { display: none; }
-  border-top: 6px solid @fg;
-  height:10%;
   .p30{
     width:30%;
   }
@@ -102,10 +126,9 @@ input[type=button] {
 }
 
 #data {
-  border-top: 6px solid @fg;
+  border-top: 2px solid @fg;
   display: inline-block;
   position: relative;
-  height: 80%;
 
   tr.active {
     color: grey;
@@ -114,9 +137,7 @@ input[type=button] {
   table td, table th {
     border-right: 1px solid @fg;
     margin: 0;
-    //padding: 2px 8px;
-    // width: 7.692%;
-    // display: inline-block;
+    padding: 2px 8px;
   }
   table thead th {
     border-bottom: 6px solid @fg;
@@ -134,20 +155,34 @@ input[type=button] {
 ##############*/
 
 .functWrap {
-  span, input {
-    margin: 12px 0;
-    font-size: 16px;
-  }
-  .btn {
-    width: 10%;
-    float: left;
-    height: 21px;
-  }
+  position:relative;
+  display: inline;
+  width: 100%;
   input {
-    width: 89%;
+    font-size: 16px;
+    margin: 0.5%;
+    padding: 0.5%;
+    width: 81%;
     float: right;
     height: 15px;
   }
+  .btn {
+    font-size: 16px;
+    width: 9.5%;
+    float: left;
+  }
+  .remove {
+    padding:0;
+    width: 3%;
+    float: left;
+    height: 26px;
+    padding: 0;
+
+  }
+}
+.btn.btn-new {
+  margin: 1%;
+  width: 98%;
 }
 
 /*##############
@@ -184,7 +219,7 @@ input[type=button] {
 ##############*/
 
 #canvasVisual {
-  float: right;
+  margin-top: 9px;
   border: 2px solid @fg;
 }
 

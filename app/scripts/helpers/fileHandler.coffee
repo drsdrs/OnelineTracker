@@ -22,7 +22,6 @@ class app.helpers.FileStorrage
           c.l data
           app.modes = data
           app.chMode()
-          app.rstSteps = true
       )(file)
       reader.readAsText file
     else alert "file to big..."
